@@ -1,0 +1,7 @@
+Documents that need to be written:
+
+- JMS / Distributed NFC HOWTO
+- Custom Authentication HOWTO
+  - JdbcAuth HOWTO, MySQLAuth HOWTO
+- Custom GUI HOWTO
+- Documentation for the NFC client applet parameters

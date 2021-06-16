@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>ChatBlender: The CarnageBlender mini-client</title>
+</head>
+
+<body>
+
+<h3>Overview</h3>
+ChatBlender is designed to be lightweight visually as well
+as a small download.  This means that CB works well on sites
+where chat must share the screen with other information,
+e.g. <a href=http://www.carnageblender.com>Carnage Blender.</a>
+
+<h3>Running ChatBlender</h3>
+CB is built as chatclient_cb.jar by default.
+The applet takes the following parameters:
+
+<ul>
+<li>user: required.  CB does no validation of userids, other
+than to report back if the NFC server fails one.  It's up to
+your web service to do any desired name validation or munging.
+In particular, CB uses " " [space] as a command delimiter, so
+you'll want to keep those out.
+<li>password: REQUIRED.  ChatBlender does not support non-passworded accounts; sorry.
+If you are really too lazy to do it right, you can always hardcode a dummy password. :P
+<li>port: optional.  NFC's default is 7777 as you probably know.
+<li>channel: required.  "room," in NFC-parlance.
+</ul>
+
+It's worth noting for people new to java that no host parameter
+is available, because unless you jump through some VERY non-trivial
+hoops to sign your applet, you're limited to connecting to
+the host the applet was downloaded from, which CB figures
+out for itself.
+
+<h3>Example</h3>
+See /contrib/nfc.tcl for how carnageblender.com serves up the CB applet.
+
+</body>
+</html>

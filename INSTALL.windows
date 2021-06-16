@@ -1,0 +1,7 @@
+INSTRUCTIONS FOR WINDOWS COMPUTERS
+
+To install on Windows, the instructions are almost the same as what
+the regular INSTALL document describes.  The main difference is that
+when running in standalone mode, you will need to edit the *.bat files
+instead of setenv.sh.
+

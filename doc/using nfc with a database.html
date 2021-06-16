@@ -1,0 +1,214 @@
+<html>
+<head>
+<title>Using NFC with a database</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>Database authentication with NFC</h1>
+<h2>Index</h2>
+<p><a href="#intro">Introduction</a><br>
+  <a href="#summary">Summary</a><br>
+  <a href="#database">Setting up a database</a><br>
+  <a href="#jdbc">The JDBC driver</a><br>
+  <a href="#authenticator">Configuring the JdbcAuthenticator</a><br>
+  <a href="#nfc">Configuring NFC to use your database</a></p>
+<p>&nbsp;</p>
+<h2><a name="intro">Introduction</a></h2>
+<p>For nontrivial applications you will want to store
+persistent information about your users.  NFC currently
+provides interfaces to handle the following types of information:
+<ul>
+<li>Usernames, passwords, and global access levels
+<li>Room access permissions
+<li>User /ignore requests
+</ul>
+
+All of these may be managed independantly with
+pluggable modules.  There are user authentication modules for
+LDAP and flat files, for instance, besides databases.  All of
+these have a JDBC (database) module, however, and that is what
+this document is about.
+
+<h2><a name="summary">Summary</a></h2>
+<p>To use JDBC storage you need to:</p>
+<ul>
+  <li>Set up a database holding your information</li>
+  <li>Get a JDBC driver for your database and edit your server startup files to 
+    include the driver on the classpath.</li>
+  <li>Edit the configuration file of the Jdbc modules (/contrib/jdbc.conf) and 
+    copy it to the conf/ directory.</li>
+  <li>Edit the NFC server configuration file to instruct the server to use the 
+    Jdbc Authenticator.</li>
+</ul>
+
+<h2><a name="database">Setting up a database</a></h2>
+<p>This document assumes that you know what a database is and how to set one up.
+Popular free choices include MySQL and PostgreSQL.
+<h3>User authentication</h3>
+  In order for authentication in NFC to work, you need a database with a table
+  that holds the following information:</p>
+<ul>
+  <li>User names</li>
+  <li>Passwords</li>
+  <li>Access levels</li>
+</ul>
+<p>This module was designed with MySQL in mind.  MySQL does not
+  support stored procedures, so this module assumes
+  all operations take place on a simple table rather than
+  allowing you to specify what statements to use for its
+  operations.  Still, users of other database can get around
+  this limitation with views and triggers if needed.
+<p>Default values assume that the table name 
+  is 'nfcusers', the user column is called 'user', the password column is called 
+  'password' and the access column is called 'access'. Both the user and password 
+  column must have data type char. If you are going to use password encryption, 
+  the password column should be able to contain at least 32 characters. The access 
+  column must be an integer. It can contain the value 0 (no access), 1 (normal 
+  user), 2 (moderator) or 100 (not used at this point).
+
+<h4>Setting a policy for guest access</h4>
+<p>The options <b>auth.allowGuests</b> and <b>auth.storeGuests</b> (in nfc.conf, NOT jdbc.conf!)
+  define the 
+  policy for authenticating users that are not in the database. In both cases 
+  the value must either be 'true' or 'false' (without the quotes) and both options 
+  are optional. allowGuests defaults to true and storeGuests defaults 
+  to false.<br>
+  When the allowGuests option is set to true, users are authenticated regardless 
+  of whether their records are found in the database. They are given access level 
+  1: normal users. Users that <i>are</i> found in the database must enter the 
+  correct password, or they will be denied access. You would set this option to 
+  true if you have a known set of moderators (with an access level of 2) that 
+  need to be authenticated and an unknown set of users that can simply be granted 
+  access.<br>
+  When you set the allowGuests option to false, all users not in the database 
+  are denied access. You would do this restrict all access to the server to a 
+  known group of users.<br>
+  The storeGuests option works in conjunction with the allowGuests option. 
+  If both are set to true, users are stored in the database when they first log 
+  in. They are given access level 1 and their passwords are also stored. The next 
+  time they log in they will only be granted access if they use the correct password. 
+  You would use this policy if you want to make sure that users have the same 
+  user name over sessions or, more precisely, that no two users can use the same 
+  user name at different times. You can also use it as a convenient way to fill 
+  the database.<br>
+  If you do not want guest users stored, set storeGuests to false. Either way, 
+  the storeGuests option only has effect if allowGuests is set to true.
+</p>
+<h4>Setting a password encryption policy</h4>
+<p>With the <b>jdbc.CryptMethod</b> option you can control password encryption. 
+  With password encryption, instead of storing the real passwords in the database 
+  (which is generally considered a Bad Idea), you store a 'message digest' of 
+  that password. A message digest is a one-way encryption; it is not possible 
+  to recover the actual password from the message digest. The Jdbc Authenticator, 
+  upon receiving a username and password, creates a message digest of the password 
+  it receives and compares that to the message digest in the database. <br>
+  The jdbc.CryptMethod option is an optional one. It defaults to the value 'none', 
+  meaning no password encryption is done. The other possible values are 'md5' 
+  and 'mysql' (without the quotes). If you use the md5 method, the Jdbc Authenticator 
+  is responsible for creating the message digest of the passwords it receives 
+  and uses the md5 algorithm (see <a href="http://www.ietf.org/rfc/rfc1321.txt">www.ietf.org/rfc/rfc1321.txt</a>) 
+  to do so. If you use the mysql method, the creation of the message digest is 
+  left up to your MySQL database. MySQL has a built-in function to do this. Needles 
+  to say, this will only work if you are actually using a MySQL database.</p>
+
+<h3>/ignore storage</h3>
+This module OTOH was designed for non-MySQL databases, in that
+ignorer/ignoree tuples
+are read and inserted from a table called nfc_users_ignoring_users.
+If you want to change that, you'll have to use views and triggers
+to pretend that's still where the action happens.
+
+<h3>Room authentication</h3>
+This is the most flexible of the modules.  There are three statements you must implement:
+<ul>
+<li>jdbc.isCreateAllowed: whether the specified user may create the specified room
+<li>jdbc.isOpRequired: whether the server should designate an Op for the specified room if no Op is present
+<li>jdbc.getRoomAccessLevel: access level of specified user for specified room.  Valid levels are as described above for system-level authentication:
+	0 = no access to this room; 1 = normal user; 2 or higher = Op.
+</ul>
+See jdbc.conf for details and example SQL.
+
+<h3>Examples</h3>
+<ul>
+  <li>contrib/mysql.sql: a MySQL script for creating the nfcusers table. Users of other databases 
+      can use it as a reference.
+  <li>contrib/postgresql.sql: a PostgreSQL script illustrating
+      creating views for nfc that reference existing tables.
+</ul>
+</p>
+<p>
+</p>
+<h2><a name="jdbc">The JDBC driver</a></h2>
+<p>A JDBC driver is a piece of software that allows Java programs to access a 
+  database. It maps the generic way in which Java talks to databases (called JDBC) 
+  to the specific implementation of a particular database. There is a different 
+  driver for every DBMS (DataBase Management System).</p>
+<p>You will need to find a database driver for your DBMS, as NFC distributions 
+  do not include any. Then you will need to put your driver file somewhere on 
+  your hard drive (in the 'lib' directory of your NFC distribution, for example) 
+  and edit your server startup scripts so that NFC will find the driver file.</p>
+<p>If you use Windows, your startup script is runServer.bat or runFlashServer.bat. 
+  In the section where the variables are declared, add the following lines:</p>
+<code>REM Set the full path to the JDBC driver jar.<br>
+      SET JDBC_JAR=[driver file]
+</code>
+<p>Where [driver file] is the full path to the driver file (that is, the directory 
+  in which your driver file is located and the name of the file). Then change 
+  the line that reads:</p>
+<code>SET CLASSPATH=%NFC_HOME%;%NFC_HOME%\conf;%NFC_HOME%\lib\chatserver.jar;%JMS_JAR%;%JNDI_jar%;%JMS_IMPL%</code><br>
+to:<br>
+<code>SET CLASSPATH=%NFC_HOME%;%NFC_HOME%\conf;%NFC_HOME%\lib\chatserver.jar;%JMS_JAR%;%JNDI_jar%;%JMS_IMPL%;%JDBC_JAR%</code>
+<p>If you use Linux, edit the setenv.sh file. Include the line:</p>
+<code>JDBC=[driver file]</code>
+<p>Where [driver file] is the full name of the driver file, and then change the 
+  line that reads:</p>
+<code>CLASSPATH=$NFC_HOME/lib/chatserver.jar:$NFC_HOME/lib/chatserver_flash.jar:$NFC_HOME/lib/chatclient_full.jar:$NFC_HOME:$JMS:$JNDI</code><br>
+to<br>
+<code>CLASSPATH=$NFC_HOME/lib/chatserver.jar:$NFC_HOME/lib/chatserver_flash.jar:$NFC_HOME/lib/chatclient_full.jar:$NFC_HOME:$JMS:$JNDI:$JDBC</code><br>
+<p>Make sure that JDBC=... comes before CLASSPATH=....</p>
+<p>&nbsp;</p>
+<h2><a name="authenticator">Configuring the Jdbc Authenticator</a></h2>
+<p>When the Jdbc Authenticator is initialized, it reads it configuration from a 
+  file named 'jdbc.conf'. This section explains the configuration options 
+  set in that file. The Jdbc Authenticator looks for jdbc.conf in the 'conf' 
+  directory of NFC_HOME (the root directory of your NFC distribution), but by 
+  default the file is located in the 'contrib' directory. You'll need to copy 
+  it to the proper directory.<br>
+  Note that both option names and option values are case-sensitive. All options 
+  are mandatory unless stated otherwise.</p>
+<h3>Setting the driver class name and the database URL</h3>
+<p>The first two options in the configuration file are <b>jdbc.Class</b> and <b>jdbc.DBUrl</b>. 
+  They specify the JDBC driver class name and the location of the database, respectively.<br>
+  Note that jdbc.Class is not the the driver file used in the previous section, 
+  but a class file contained therein. See the documentation of your JDBC driver 
+  for the name of the driver class file.<br>
+  JDBC drivers use a URL to locate a database. The format of the URL varies from 
+  driver to driver, so consult the driver documentation. Some JDBC drivers include 
+  the database username and password in the URL. If your driver does, include 
+  them and leave the jdbc.DBUsername and jdbc.DBPassword options blank.</p>
+<h3>Setting the database user name and password</h3>
+<p>The options <b>jdbc.DBUsername</b> and <b>jdbc.DBPassword</b> set -as one would 
+  expect- the username and password needed to access the database. Set them accordingly. 
+  The user needs no other privileges then to add, modify and remove records from 
+  the table that holds the user names, passwords and access levels.</p>
+  
+<h2><a name="nfc">Configuring NFC to use your database</a></h2>
+<p>The final step in using the database is to instruct the NFC server 
+  to use the appropriate JDBC modules. Set the appropriate
+  properties in nfc.conf to do this.  The lines are already there;
+  all you have to do is comment out the Null line and uncomment the Jdbc line.
+<ul>
+<li>User authentication: auth.class
+<li>Ignore storage: ignoreStore.class
+<li>Room authentication: roomAuth.class
+</ul>
+</p>
+For example, for user authentication you would comment out the line
+<p><code>auth.class=com.lyrisoft.chat.server.remote.persistence.auth.NullAuthenticator</code></p>
+<p>by prepending it with a #. Then uncomment the line:</p>
+<p><code>auth.class=com.lyrisoft.chat.server.remote.persistence.auth.JdbcAuthenticator</code></p>
+<p>by deleting the # that precedes it.</p>
+<p>&nbsp;</p>
+</body>
+</html>

@@ -1,0 +1,4 @@
+#!/bin/sh
+. `dirname $0`/setenv.sh
+CLASSPATH=classes/test:$CLASSPATH
+$JAVA_HOME/bin/java -DNFC_HOME=$NFC_HOME com.lyrisoft.chat.test.LoadTest $*

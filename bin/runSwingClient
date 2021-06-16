@@ -1,0 +1,9 @@
+#!/bin/sh
+# runSwingClient
+# This script runs the NFC client with a Swing GUI as a stand-alone app.
+# You need at least Java 1.2 for this.
+# See setenv.sh
+
+. `dirname $0`/setenv.sh
+$JAVA_HOME/bin/java -DNFC_HOME=$NFC_HOME -DguiFactory=com.lyrisoft.chat.client.gui.jfc.SwingGuiFactory com.lyrisoft.chat.client.Main $*
+

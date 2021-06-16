@@ -1,0 +1,237 @@
+<HTML>
+<head>
+<title>ajdigital - NFC Flash Chat</title>
+<link rel=stylesheet type="text/css" href="/ajdigital.css">
+</head>
+
+<body>
+
+<h1>NFC Flash Chat</h1>
+
+<P>
+While I am not a big "chatter," building a chat application was a nice way to play with some of the new Flash 5 features and prototype some new ideas I've had about designing applications with Flash. This framework can be used to build other real-time, multiuser Flash applications. I'm interested to hear what you think of all this and am happy to answer questions. Send email to <a href="mailto:alon@ajdigital.com">alon@ajdigital.com</a>.
+</p>
+
+<table border=0>
+<tr valign="top">
+<td width=300>
+
+<UL>
+<li><a href="#overview">Overview</a>
+<li><a href="#engine">Using the Chat Engine</a>
+<li><a href="#thoughts">Thoughts</a>
+<li><a href="#bugs">Bugs</a>
+<li><a href="#server">The Chat Server</a>
+<li><a href="#download">Download</a>
+<li><a href="#license">License</a>
+</td>
+<td align="right">
+<P>
+<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+ 		codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0"
+ 		WIDTH=440 
+		HEIGHT=330>
+ <PARAM NAME=movie VALUE="nfcUI.swf"> 
+ <PARAM NAME=quality VALUE=high> 
+ <PARAM NAME=bgcolor VALUE=#FFFFFF> 
+ <EMBED src="http://www.ajdigital.com/nfcchat/flash/nfcUI.swf" 
+ 		quality=high 
+		bgcolor=#FFFFF  
+		WIDTH=440 
+		HEIGHT=330 
+		TYPE="application/x-shockwave-flash" 
+		PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash">
+</EMBED>
+</OBJECT>
+</td>
+</tr>
+</table>
+</P>
+
+<a name="overview"></a>
+<h2>Overview</h2>
+<P>
+This is a Flash chat client for the Java chat server NFC Chat, located at <A href="http://nfcchat.sourceforge.net">http://nfcchat.sourceforge.net</a>. It is available for you to download, pull apart and use. There are three main pieces to this Flash application:
+</P>
+
+<ul>
+<li> <b>the chat engine</b><br>
+The file <a href="#download">nfcEngine.fla</a> provides all the functionality needed to send a recieve messages with the chat server using XML socket communication (Flash 5 only). There are no visual elements to this implementation. You can do what you want with this file, but you can use it as is to implement your own chat interface. You should load nfcEngine.swf in to your own Flash movie that provides all your interface elements. 
+<P>
+
+<li> <b>the interface</b><br>
+The file <a href="#download">nfcUI.fla</a> is an implementation of an interface that uses the chat engine. It supports most but not all of the messages that you can send and receive. Feel free to modify and use this file to create your own interface.
+<P>
+<li> <b>the chat server</b><br>
+The <a href="#server">chat server</a> is running NFC Chat (<A href="http://nfcchat.sourceforge.net">http://nfcchat.sourceforge.net</a>) with some additional code to support sending and receiving XML messages.
+</ul>
+
+<a name="engine"></a>
+<h2>Using the ChatEngine</h2>
+<P>
+You should load nfcEngine.swf in to your own Flash movie that provides all your interface elements. It does not matter where you load this movie as it will set a variable <tt>_root._ChatEngine</tt> when it loads that points to itself. The interface should only reference the engine through this variable, as in <tt>_root._ChatEngine.sendSignOn(username,password);</tt>
+<P>
+Likewise, your interface file should set a variable at the root that points to the location of the Handler clip:<BR>
+<tt><b>_root._ChatInterface = this;</b></tt><BR>
+The chat engine uses this variable to communicate with the interface. nfcUI.fla does this on the first frame of the movie.
+
+<a name="sending"></a>
+<h3>Sending messages</h3>
+
+When you call a function in the chat engine to send a message, the engine builds the appropriate message format, creates an XML document object and sends it through the socket it has opened with the server. None of these functions have return values. All messages sent back from the server must be received and processed using the <a href="#receiving">available handlers</a>. You just need to call the functions:
+<P>
+<dl>
+<dt><tt><b>_root._ChatEngine.sendSignon(username, password)</b></tt>
+<dd> Connect and login in to the server. Password not required.
+<dt><tt><b>_root._ChatEngine.sendSignoff()</b></tt>
+<dd> Log off.
+<dt><tt><b>_root._ChatEngine.sendStats()</b></tt>
+<dd> Request server stats
+<dt><tt><b>_root._ChatEngine.sendGetRoomsList()</b></tt>
+<dd> Request list of all rooms 
+<dt><tt><b>_root._ChatEngine.sendJoinRoom(room)</b></tt>
+<dd> Request to join a room
+<dt><tt><b>_root._ChatEngine.sendUserInfo(username)</b></tt>
+<dd> Request user stats
+<dt><tt><b>_root._ChatEngine.sendGetUserList()</b></tt>
+<dd> Request list of all users
+<dt><tt><b>_root._ChatEngine.sendRoomMessage(room,message)</b></tt>
+<dd> Send message to a room
+<dt><tt><b>_root._ChatEngine.sendRequestUsersInRoom(room)</b></tt>
+<dd> Request list of users in a room
+<dt><tt><b>_root._ChatEngine.sendPartRoom(room)</b></tt>
+<dd> Leave a room
+<dt><tt><b>_root._ChatEngine.sendSayToUserMessage()</b></tt>
+<dd> Send a private message to a user
+<dt><tt><b>_root._ChatEngine.sendEmoteToRoomMessage()</b></tt>
+<dd> Emote to a room
+<dt><tt><b>_root._ChatEngine.sendEmoteToUserMessage()</b></tt>
+<dd> Emote privately to a user
+<dt><tt><b>_root._ChatEngine.sendHelpMessage(command)</b></tt>
+<dd> Not very useful - request help info on an NFCChat command
+<dt><tt><b>_root._ChatEngine.sendVersionMessage(version)</b></tt>
+<dd> Not very useful but nice to do - tell the server what kind of client you are
+<dt><tt><b>_root._ChatEngine.sendKillMessage(user,message)</b></tt>
+<dd> Kill a user - not sure what this actually does
+<dt><tt><b>_root._ChatEngine.sendIgnoreMessage(username)</b></tt>
+<dd> Tell server to not send messages from a specifc user to us
+<dt><tt><b>_root._ChatEngine.sendUnIgnoreMessage(username)</b></tt>
+<dd> Tell server to start sending messages from a specifc user
+</dl>
+
+<a name="receiving"></a>
+<h3>Receiving messages</h3>
+
+The server sends messages to the chat client, sometimes in response to messages you have sent, and sometimes because of other users' actions (like saying something to a room). When server messages come in, they are received by the chat engine, parsed and processed before the engine calls these functions in the interface. These are the functions you will need to use or tweak to build the interface:
+<dl>
+<dt><tt><b>_root._ChatInterface.Handler.handleConnect()</b></tt>
+<dd> Connected successfully to the chat server
+<dt><tt><b>_root._ChatInterface.Handler.handleFailedConnect()</b></tt>
+<dd> Failed connecting to the chat server
+<dt><tt><b>_root._ChatInterface.Handler.handleClose()</b></tt>
+<dd> Connection to the chat server is shut down
+<dt><tt><b>_root._ChatInterface.Handler.handleSignon()</b></tt>
+<dd> Acknowledgement of successful logon
+<dt><tt><b>_root._ChatInterface.Handler.handleError(error)</b></tt>
+<dd> Something went wrong
+<dt><tt><b>_root._ChatInterface.Handler.handleUnknown(array)</b></tt>
+<dd> We received a message type we did not recognize, input is an array
+<dt><tt><b>_root._ChatInterface.Handler.handleNoAction(message)</b></tt>
+<dd> We received a message with no action (server &amp; user stats)
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomJoin(room)</b></tt>
+<dd> Acknowledgement of successful room join
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomMsg(sender, room, message)</b></tt>
+<dd> Received a message from a sender to a room
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomUserDiff(room, diff, username)</b></tt>
+<dd> A user left or joined a room, diff = + or -
+<dt><tt><b>_root._ChatInterface.Handler.handleServerUserList(users)</b></tt>
+<dd> Receive a list of all users
+<dt><tt><b>_root._ChatInterface.Handler.handleServerRoomList(rooms)</b></tt>
+<dd> Receive a list of all rooms with number of users in each, as in
+(room1, 2, room2, 4, room3, 0)
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomUserList(room, users)</b></tt>
+<dd> Receive list of users in a room
+<dt><tt><b>_root._ChatInterface.Handler.handlePartRoom(room)</b></tt>
+<dd> Acknowledgement of leaving a room
+<dt><tt><b>_root._ChatInterface.Handler.handlePrivateMsg(sender, message)</b></tt>
+<dd> Receive private message from a sender
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomEmote(sender, room, message)</b></tt>
+<dd> Receive a message emoted to a room
+<dt><tt><b>_root._ChatInterface.Handler.handleUserEmote(sender, msg)</b></tt>
+<dd> Receive private message emoted from a sender
+<dt><tt><b>_root._ChatInterface.Handler.handleKill(killer, msg)</b></tt>
+<dd> Handle being killed by a user who also sends a message, I haven't seent this happen yet
+<dt><tt><b>_root._ChatInterface.Handler.handleUserDiff(username, diff)</b></tt>
+<dd> Handle a user arriving or leaving the chat
+<dt><tt><b>_root._ChatInterface.Handler.handleRoomDiff(room, diff)</b></tt>
+<dd> Handle a room being added or removed
+<dt><tt><b>_root._ChatInterface.Handler.handleShutdown()</b></tt>
+<dd> Server shut down
+</dl>
+
+
+<a name="thoughts"></a>
+<h2>Thoughts</h2>
+
+<h3>What's this about?</h3>
+I had a couple goals in initiating this project:
+
+<OL>
+<LI>To play with and learn some of the new Flash 5 features
+<LI>To prototype ways to build Flash apps so that funcionality is independent of interface
+<LI>To build reusable interface components that can be used by a range of applications
+</OL>
+
+I feel somewhat successful with the first two. Your efforts to use this implementation to tweak or create new interfaces will be a good test of number 2. The third has not been a high priority on this project and therefore I haven't done much with it. The lists in the interface I provide are a start with this.
+
+<h3>Simplify</h3>
+
+While the nfcUI.fla interface is pretty full featured. The chat engine could be used to make a much simpler chat that only takes a login and has just one room. All you need to do is send and recieve the messages you want to use and ignore everything else. If I get a chance, I'd like to put together a sample of this.
+
+<h3>Add Chat to All Your Flash</h3>
+Because the chat engine and interface create their own references by which they communicate, you can create a chat program to load in to your other Flash apps. It would be cool to be playing a Flash game and be able to send messages to all the other players. You can do that with this implementation.
+
+<h3>Debugging</h3>
+
+To debug while authoring, I use trace a lot. In fact, if you load and use the nfcEngine.swf file while testing your movie, you will see a lot of stuff written to output. I try to use trace messages that look like:
+<PRE>
+    trace(this + ": whatever you want to say");
+</PRE>
+"this" resolves to the path to the movie clip creating the trace message so that it's easy to see where it's coming from. Messages from the nfcEngine will have a movie clip path dependent on where you load the movie. To hide these messages or reduce the size of the .swf created, select to remove trace actions in your publish settings.
+
+<a name="bugs"></a>
+<h2>Bugs</h2>
+
+As with all works in progress, there are a few bugs. I'm not concerned with interface bugs but more with bugs in the handling of communication with the chat server. I'll list known problems here and fix them when I can. 
+
+<a name="server"></a>
+<h2>The Chat Server</h2>
+
+I have a chat server running at www.ajdigital.com. This server is only for development and testing. I will not guarantee it's stability or reliability, but you are welcome to test against it. 
+<P>
+The chat server is called NFC Chat and is an open source Java chat server. More information and source code is available at <A href="http://nfcchat.sourceforge.net">http://nfcchat.sourceforge.net</a>. 
+<P>
+I chose this server because it is open source, well designed, full of features, and easy to extend. You can add new message types, tweak the code, or, as I did, look at how it is implemented and add your own code to it.
+
+<h3>Made "Flashable"</h3>
+
+I extended the chat server to change the format in which it sends messages. Flash requires that all socket messages are sent and received in XML format. I just wrapped the default NFC messages in simple XML. Essentially, instead of sending and receiving messages that look like:
+<PRE>
+    /saytoroom  chatroom    hi, guys!
+</PRE>
+The messages now look like:
+<PRE>
+    &lt;message value="/saytoroom  chatroom    hi, guys!" /&gt;
+</PRE>
+
+<P>
+These changes I made require no modifications to the source provided on SourceForge - they simply extend the existing application with new functionality. 
+They are in SourceForge CVS in web/flash/ if you want to grab them there and will be available in the build following release 1.0.6-rc2.
+
+<a name="license"></a>
+<h2>License</h2>
+
+I am distributing the chat engine under the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License (GPL)</a> which pretty means you can do anything with this stuff except sell it to someone else without getting my permission. You can do absolutely anything you want with the interface. If you want to use this stuff in your own work and/or sell it as part of your work, all you need to do is ask.
+
+</body>
+</html>

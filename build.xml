@@ -1,0 +1,275 @@
+<!--
+This is Ant's build.xml.  It contains the rules for compiling the
+project.
+
+You need Ant to compile this.  Get it from
+http://jakarta.apache.org/ant if you don't have it.
+-->
+<project name="nfc" default="build" basedir=".">
+
+<!-- set global properties for this build -->
+<property name="src" value="src"/>
+<property name="web" value="web"/>
+<property name="apidocs" value="doc/api"/>
+<property name="lib" value="lib"/>
+<property name="classes" value="classes"/>
+<property name="debug" value="true"/>
+<property name="webapps" value="webapps"/>
+<property name="app.version" value="1.1.0"/>
+<property name="dist"  value="${ant.project.name}-${app.version}"/>
+
+<!-- patternset for the common server classes -->
+<patternset id="base.server.classes">
+  <include name="jfd/**"/>
+  <include name="com/lyrisoft/chat/server/remote/**"/>
+  <include name="com/lyrisoft/chat/*.class"/>
+  <include name="com/lyrisoft/chat/client/IChatClient.class"/>
+  <include name="com/lyrisoft/util/**"/>
+</patternset>
+
+<!-- patternset for the common client classes -->
+<patternset id="base.client.classes">
+  <include name="com/lyrisoft/chat/client/**"/>
+  <exclude name="com/lyrisoft/chat/client/gui/**"/>
+  <include name="com/lyrisoft/chat/server/local/**"/>
+  <include name="com/lyrisoft/chat/*.class"/>
+  <include name="com/lyrisoft/util/i18n/**"/>
+</patternset>
+
+<!-- set the compilation classpath -->
+<path id="project.class.path">
+  <fileset dir="lib">
+    <include name="**/*.jar"/>
+  </fileset>
+</path>
+
+<!-- take care of any necessary setup -->
+<target name="init">
+  <!-- Create the time stamp -->
+  <tstamp/>
+  <!-- Create the build directory structure used by compile -->
+  <mkdir dir="${classes}"/>
+</target>
+
+<!-- compile all the java classes -->
+<target name="compile" depends="init" description="Just compile the java code">
+  <!-- Compile the java code from ${src} into ${classes} -->
+  <javac deprecation="off" debug="${debug}"
+         srcdir="${src}" destdir="${classes}"
+         excludes="test/**">
+    <classpath refid="project.class.path"/>
+  </javac>
+</target>
+
+<!-- jar everything up all nice -->
+<target name="jars" depends="compile" description="Create the jar files">
+  <!-- jar the server -->
+  <jar jarfile="${lib}/chatserver.jar">
+    <fileset dir="${classes}">
+      <patternset refid="base.server.classes"/>
+    </fileset>
+  </jar>
+
+  <!-- jar the server with flash extensions -->
+  <jar jarfile="${lib}/chatserver_flash.jar">
+    <fileset dir="${classes}">
+      <patternset refid="base.server.classes"/>
+      <include name="com/ajdigital/**"/>
+    </fileset>
+  </jar>
+
+  <!-- jar the full client -->
+  <jar jarfile="${lib}/chatclient_full.jar">
+    <fileset dir="${classes}">
+      <patternset refid="base.client.classes"/>
+    </fileset>
+    <fileset dir="${classes}">
+      <include name="com/lyrisoft/awt/**"/>
+      <include name="com/lyrisoft/chat/client/gui/**"/>
+    </fileset>
+  </jar>
+
+  <!-- jar the awt-only client -->
+  <jar jarfile="${lib}/chatclient_awt.jar">
+    <fileset dir="${classes}">
+      <patternset refid="base.client.classes"/>
+    </fileset>
+    <fileset dir="${classes}">
+      <include name="com/lyrisoft/awt/**"/>
+      <include name="com/lyrisoft/chat/client/gui/*.class"/>
+      <include name="com/lyrisoft/chat/client/gui/awt102/**"/>
+    </fileset>
+  </jar>
+
+  <!-- jar the swing-only client -->
+  <jar jarfile="${lib}/chatclient_swing.jar">
+    <fileset dir="${classes}">
+      <patternset refid="base.client.classes"/>
+    </fileset>
+    <fileset dir="${classes}">
+      <include name="com/lyrisoft/chat/client/gui/*.class"/>
+      <include name="com/lyrisoft/chat/client/gui/jfc/**"/>
+    </fileset>
+  </jar>
+
+  <!-- jar the swing miniclient -->
+  <jar jarfile="${lib}/chatclient_cb.jar">
+    <fileset dir="${classes}">
+      <include name="com/carnageblender/chat/*.class"/>
+      <include name="com/lyrisoft/chat/ICommands.class"/>
+    </fileset>
+  </jar>
+</target>
+
+<!-- the 'build' target compiles and then jars -->
+<target name="build" depends="jars,webapp" description="Build the whole project"/>
+
+<!-- the 'webapp' target creates a portable WAR file -->
+<target name="webapp" depends="jars" description="Create the webapp (war file)">
+  <mkdir dir="${ant.project.name}"/>
+  <copy todir="${ant.project.name}">
+    <fileset dir="${web}"/>
+    <fileset dir="${lib}">
+      <include name="chatclient*"/>
+    </fileset>
+  </copy>
+  <copy todir="${ant.project.name}/WEB-INF">
+    <fileset dir=".">
+      <include name="${lib}/**"/>
+      <exclude name="${lib}/servlet.jar"/>
+      <exclude name="${lib}/chatclient*"/>
+    </fileset>
+    <fileset dir=".">
+      <include name="conf/**"/>
+    </fileset>
+  </copy>
+
+  <!-- war it up -->
+  <mkdir dir="${webapps}"/>
+  <delete file="${webapps}/${ant.project.name}.war"/>
+  <jar jarfile="${webapps}/${ant.project.name}.war">
+    <fileset dir="nfc"/>
+  </jar>
+
+  <!-- delete the webapp tree since we have a war of it -->
+  <delete dir="${ant.project.name}"/>
+</target>
+
+<!-- create the source and binary distributions -->
+<target name="dist" depends="webapp" description="Create the source and binary distribution tarballs">
+  <!-- first the source dist -->
+  <mkdir dir="${dist}"/>
+
+  <copy todir="${dist}">
+    <fileset dir=".">
+      <include name="ChangeLog"/>
+      <include name="COPYING"/>
+      <include name="README"/>
+      <include name="INSTALL*"/>
+      <include name="build.xml"/>
+      <include name="src/**"/>
+      <include name="conf/**"/>
+      <include name="contrib/**"/>
+      <include name="web/**"/>
+      <include name="bin/**"/>
+      <exclude name="bin/setenv.sh.in"/>
+
+      <include name="doc/**"/>
+      <exclude name="doc/api/**"/>
+
+      <include name="lib/**"/>
+      <exclude name="lib/chatserver*"/>
+      <exclude name="lib/chatclient*"/>
+    </fileset>
+  </copy>
+
+  <!-- tar.gz it up -->
+  <tar tarfile="${dist}.tar" basedir="." includes="${dist}/**"/>
+  <gzip zipfile="${dist}.tar.gz" src="${dist}.tar"/>
+  <delete file="${dist}.tar"/>
+  <!-- and zip it too -->
+  <zip zipfile="${dist}.zip" basedir="." includes="${dist}/**"/>
+
+  <!-- now we'll make the binary by deleting stuff from the source dist -->
+  <delete dir="${dist}/src"/>
+  <!-- and adding the compiled jars and wars -->
+  <copy todir="${dist}/lib">
+    <fileset dir="lib">
+      <include name="chatserver*"/>
+      <include name="chatclient*"/>
+    </fileset>
+  </copy>
+  <copy todir="${dist}">
+    <fileset dir=".">
+      <include name="webapps/**"/>
+    </fileset>
+  </copy>
+
+
+  <!-- tar.gz it up -->
+  <tar tarfile="${dist}-bin.tar">
+    <tarfileset dir="${dist}/.." mode="755">
+      <include name="${dist}/bin/runServer"/>
+      <include name="${dist}/bin/runFlashServer"/>
+      <include name="${dist}/bin/runClient"/>
+      <include name="${dist}/bin/runSwingClient"/>
+      <include name="${dist}/bin/loadtest"/>
+      <include name="${dist}/bin/nfcpasswd"/>
+      <include name="${dist}/bin/setenv.sh"/>
+    </tarfileset>
+    <tarfileset dir="${dist}/..">
+      <include name="${dist}/**"/>
+      <exclude name="${dist}/bin/runServer"/>
+      <exclude name="${dist}/bin/runFlashServer"/>
+      <exclude name="${dist}/bin/runClient"/>
+      <exclude name="${dist}/bin/runSwingClient"/>
+      <exclude name="${dist}/bin/loadtest"/>
+      <exclude name="${dist}/bin/nfcpasswd"/>
+      <exclude name="${dist}/bin/setenv.sh"/>
+    </tarfileset>
+  </tar>
+  <gzip zipfile="${dist}-bin.tar.gz" src="${dist}-bin.tar"/>
+  <delete file="${dist}-bin.tar"/>
+  <!-- and zip it too -->
+  <zip zipfile="${dist}-bin.zip" basedir="." includes="${dist}/**"/>
+
+  <!-- blow away the work tree -->
+  <delete dir="${dist}"/>
+</target>
+
+<!-- generate the api docs -->
+<target name="docs" description="Generate Javadocs">
+  <mkdir dir="${apidocs}" />
+  <javadoc classpathref="project.class.path"
+           sourcepath="${src}"
+           destdir="${apidocs}"
+	   overview="${src}/overview.html"
+	   windowtitle="NFC Chat API"
+	   doctitle="NFC Chat API"
+	   bottom="Copyright &#169; 2000-2003 Taso Lyristis"
+           packagenames="com.ajdigital.*,com.lyrisoft.*,jfd.*"/>
+</target>
+
+<!-- clean up the work tree -->
+<target name="clean" description="Clean up built modules">
+  <delete dir="${classes}"/>
+  <delete dir="${dist}"/>
+  <delete dir="${apidocs}"/>
+  <delete file="lib/chatserver.jar"/>
+  <delete file="lib/chatserver_flash.jar"/>
+  <delete file="lib/chatclient_full.jar"/>
+  <delete file="lib/chatclient_awt.jar"/>
+  <delete file="lib/chatclient_swing.jar"/>
+  <delete file="lib/chatclient_cb.jar"/>
+  <delete dir="${webapps}"/>
+  <!-- cvs and emacs junk -->
+  <delete>
+    <fileset dir="." defaultexcludes="no">
+      <include name="**/#*"/>
+      <include name="**/.#*"/>
+      <include name="**/*~"/>
+    </fileset>
+  </delete>
+</target>
+
+</project>

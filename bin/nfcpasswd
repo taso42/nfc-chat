@@ -1,0 +1,13 @@
+#!/bin/sh
+# nfcpasswd
+# This script adds users to the nfc.passwd file. Run it from the command line and invoke as:
+# nfcpasswd [username] [access level] [password]
+# After this you should see a new line in the conf/nfc.passwd file. [access level] can be
+# any number, it should correspond to your commands.properties file. Normally, you would use
+# 0 for no access, 1 for normal user and 2 for moderator.
+# See setenv.sh
+
+. `dirname $0`/setenv.sh
+$JAVA_HOME/bin/java -DNFC_HOME=$NFC_HOME com.lyrisoft.chat.server.remote.auth.Passwd $*
+
+

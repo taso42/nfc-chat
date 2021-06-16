@@ -1,0 +1,403 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+      "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>NFC INSTALLATION</title>
+  <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+</head>
+<body>
+
+<small>
+$Id: install.html,v 1.1 2002/02/09 21:30:30 taso Exp $
+</small>
+
+<h1>Installing NFC</h1>
+<p>
+This document desribes how to obtain, build, configure, and run NFC.
+It written with NFC 1.0.x in mind.  If you are using an earlier version,
+it is recommended that you upgrade to the latest 1.0 version.
+<p>
+The instructions contained herein are written assuming that you are
+working in a Unix-like environment.  If you are using something else,
+such as Windows, the compilation steps described herein will not work
+for you.  If you are an experienced Java developer, and you're running
+Windows, you will probably be able to compile manually, using this
+document and the Makefile as a guide, without too much headache.
+<p>
+[TODO: write an Install doc for Windows] (Any volunteers?)
+
+<p>
+
+
+<ol>
+  <li><a href="#1">Download</a>
+  <li><a href="#2">Unzip</a>
+  <li><a href="#3">Edit the build environment</a>
+  <li><a href="#4">Make</a>
+  <li><a href="#5">Configure the server</a>
+  <li><a href="#6">Run the server</a>
+  <li><a href="#7">Check the server</a>
+  <li><a href="#8">Run the client</a>
+  <li><a href="#9">Make the chat web-accessible</a>
+</ol>      
+
+<a name="1"></a>
+<h2>1. Download</h2>
+<p>
+You can download the current version of NFC from SourceForge, using
+the following url: <a
+href="http://sourceforge.net/project/showfiles.php?group_id=12069&release_id=13110">http://sourceforge.net/project/showfiles.php?group_id=12069&release_id=13110</a>.
+The file that has <code>-bin</code> in its name is the binary release.
+If you download the binary then you do not have to compile (skip steps 3 and 4). 
+<p>
+You will also need the following:
+<table>
+  <tr>
+    <td width="65%"><b>Package</b></td>
+    <td><b>Download site</b></td>
+  </tr>
+  <tr>
+    <td>Java 2 SDK</td>
+    <td><a href="http://java.sun.com/products/jdk/1.2/">Sun</a></td>
+  </tr>	
+  <tr>
+    <td>Java Development Kit 1.0.2 (<i>optional</i>)</td>
+    <td><a href="http://java.sun.com/products/jdk/1.0.2/">Sun</a></td>
+  </tr>	
+  <tr>
+    <td>Java Servlet 2.2 API</td>
+    <td><a href="http://jakarta.apache.org/tomcat/">Jakarta</a></td>
+  </tr>	
+  <tr>
+    <td>JMS (Java Messaging Service) 1.0.2 and JNDI (Java Naming and
+	Directory Service) (1.2.1) APIs</td>
+    <td><a href="http://www.swiftmq.com/">SwiftMQ</a></td>
+  </tr>
+  <tr>
+    <td>JavaDeps 1.1 (<i>optional</i>)</td>
+    <td><a
+	href="http://www.vet.com.au/java/javadeps/">http://www.vet.com.au/java/javadeps/</a>
+  </tr>	
+</table>
+<hr size="1" align="left" noshade width="33%">
+<small>Note: In order to compile, all that you really, really need
+from Jakarta and SwiftMQ are the following three jars: servlet.jar,
+jms.jar, and jndi.jar.  If you already have these on your system, or
+if you have some preferences besides Jakarta and SwiftMQ, feel free to
+make substitutions.  Just be sure you have the correct versions of the
+API's.</small>
+<p>
+
+
+<a name="2"></a>
+<h2>2. Unzip</h2>
+<p>
+Well, you should know how to do this. :)  When you unzip the package,
+you will end up with a subdirectory having a name something like
+nfc-1.0.0.  From now on, we'll be referring to that directory as
+<code>$NFC_HOME</code>.
+
+<a name="3"></a>
+<h2>3. Edit the environment</h2>
+<p>
+<font color="red">[this step is not necessary if you downloaded the binary release]</font>
+<p>
+There is no facny configure script for NFC (I wish there was).  You have to edit a
+file by hand, to bootstrap the build process.  Don't worry, this is easy.
+<p>
+The Makefile will look for a file called <code>.env</code>.  If that
+file does not exist in <code>$NFC_HOME</code>, then you should copy the example
+file, <code>env.eg</code> to <code>.env</code>
+<p>
+This is what that file looks like
+<p>
+
+<code>
+# Example env file (to be copied or renamed to ".env").<br>
+#<br>
+# Please modify to suit your environment:<br>
+<br>
+# Home of JDK1.2.2<br>
+JAVA_HOME = <em class="green"><code>/usr/local/java/jdk1.2.2</code></em><br>
+<br>
+# Home of JDK1.0.2 (if you don't have this, then set it to be the same<br>
+# as above <br>
+JAVA_HOME_102 = <em class="green"><code>/usr/local/java/jdk1.0.2</code></em><br>
+<br>
+# Location of the servlet (Java Servlet API 2.2) jar<br>
+SERVLET = <em class="green"><code>/usr/local/tomcat-3.1/lib/servlet.jar</code></em><br>
+<br>
+# Location of the JavaDeps executable (if you don't have this, don't<br>
+# worry; you're probably still ok.)<br>
+JDEPS = <em class="green"><code>/usr/local/java/JavaDeps-1.1/jdeps</code></em><br>
+<br>
+# Location of the JMS 1.0.2 API<br>
+JMS = <em class="green"><code>/usr/local/java/swiftmq_1_1/jars/jms.jar</code></em><br>
+<br>
+# Location of the JNDI 1.2.1 API<br>
+JNDI = <em class="green"><code>/usr/local/java/swiftmq_1_1/jars/jndi.jar</code></em><br>
+<br>
+</code>
+
+<p>
+Edit the values in green to match your system.  Some notes:
+<p>
+
+<ol>
+  <li>If you do not have JDK 1.0.2, don't panic.  Just set
+      JAVA_HOME_102 to be the same as JAVA_HOME.
+  <li>If you do not have JavaDeps, don't panic.  As long as you're
+      compiling only, and not adding/changing code, the deps included
+      with the distribution should work.  (Just set JDEPS to any old
+      value or blank if you don't have it)
+</ol>
+
+<a name="4"></a>
+<h2>4. Make</h2>
+<p>
+<font color="red">[this step is not necessary if you downloaded the binary release]</font>
+<p>
+Now that the <code>.env</code> file is correctly set up, or so we
+hope, you can type <code>make</code> from the top-level NFC
+directory.  After some time, if there were no errors, NFC should be
+compiled and jarred.
+<p>
+If you notice lots of deprecation warnings during the build, it is
+probably because you are not using JDK 1.0.2 to compile the client.
+The client is written using the old JDK 1.0.2 API on purpose, to
+ensure maximum compatability web browsers.  It is safe to ignore the
+deprecation warnings.
+<p>
+To confirm that NFC is compiled, look in the
+<code>$NFC_HOME/lib</code> directory.  You should see two jars
+(chatserver.jar and chatclient.jar).  Also check the
+<code>$NFC_HOME/web</code> directory and look for chatclient_awt.jar
+and chatclient_swing.jar.  Those are the "web ready" jars.  If you see
+all 5 jars, congratulations!  Now, on to <i>configuring</i> the
+software itself.
+
+
+<a name="5"></a>
+<h2>5. Configure the server</h2>
+<p>
+The first thing you'll want to do is have a look at the
+<code>nfc.conf</code> file.  Here is an example conf file
+<p>
+
+<code>
+# Log files [OPTIONAL]<br>
+# (If omitted, the message log goes to stdout and the error log <br>
+# goes to stderr)<br>
+#################################################################<br>
+log.file=log/nfc.log<br>
+error.log.file=log/nfc.error_log<br>
+<br>
+# Port to listen on [REQUIRED]<br>
+listen.port=7777<br>
+<br>
+# Idle timeout in minutes [OPTIONAL]<br>
+# If not specified (commented out), defaults to 60 minutes<br>
+# If set to zero, idle timeouts are disabled<br>
+idle.timeout=0<br>
+<br>
+# Location of the commands file [REQUIRED]<br>
+commands=commands.properties<br>
+<br>
+# Authentication class [REQUIRED]<br>
+# Specified by a fully-qualified class name. <br>
+#################################################################<br>
+# NullAuthenticator: authenticates everybody<br>
+auth.class=com.lyrisoft.chat.server.remote.auth.NullAuthenticator<br>
+<br>
+# PasswdAuthenticator uses a unix-style passwd file<br>
+#auth.class=com.lyrisoft.chat.server.remote.auth.PasswdAuthenticator<br>
+<br>
+# JMS<br>
+jms.enabled=false<br>
+jndi.initial=com.swiftmq.jndi.InitialContextFactoryImpl<br>
+jms.provider=smqp://localhost:4001/timeout=10000<br>
+jms.topic=nfc<br>
+</code>
+
+<p>
+You can change any of these values to values that better suit your
+taste.  Make sure that you specify exactly one
+<code>auth.class</code>.  If unsure, then use the
+<code>NullAuthenticator</code>.
+
+<p>
+One thing you'll probably want to do one your first time around is set
+jms.enabled to false. 
+
+<p>
+After nfc.conf is squared away, you will need to have a look at the
+file <code>$NFC_HOME/bin/setenv.sh</code>.  Only the first few lines
+of <code>setenv.sh</code> need editting.  Similar to what you did for
+the <code>.env</code> in step 3, you will need to set
+<code>JAVA_HOME</code>, <code>JMS</code>, and <code>JNDI</code> to the
+appropriate paths on your system.
+
+<p>
+Here is an excerpt
+<p>
+<code>
+# Set your JDK1.2 installation<br>
+JAVA_HOME = <em class="green"><code>/usr/local/java/jdk1.2.2</code></em><br>
+<br>
+# Set to point to your JMS 1.0.2 jar<br>
+JMS = <em class="green"><code>/usr/local/java/swiftmq_1_1/jars/jms.jar</code></em><br>
+<br>
+# Set to point to a JMS IMPLEMENTATION library (if you plan to set up<br>
+# or participate in a distributed chat network)<br>
+JMS_IMPL = <em class="green"><code>/usr/local/java/swiftmq_1_1/jars/swiftmq.jar</code></em><br>
+<br>
+# Set to the location of your JNDI 1.2.1 jar<br>
+JNDI = <em class="green"><code>/usr/local/java/swiftmq_1_1/jars/jndi.jar</code></em><br>
+</code>
+<p>
+As with the <code>.env</code> example above, edit the values in
+green to match your system.  The <code>JMS_IMPL</code>
+variable is something that has not appeared up until now.  This
+variable is very important for running NFC in distributed mode.  If
+you are setting up a standalone server, then just ignore it.  Otherwise,
+set it to contain the paths(s) or jar(s) for your JMS implementation.
+Multiple jars and paths can be specified by separating them with
+colons.
+
+<a name="6"></a>
+<h2>6. Run the server</h2>
+<p>
+Assuming everything is propertly set up, simply
+execute the shell-script <code>$NFC_HOME/bin/runServer</code> to start
+the NFC server.
+<p>
+Note:  You can use the environment variable <code>JAVA_OPTS</code> to
+pass arguments to the Java Virtual Machine.  Setting
+<code>JAVA_OPTS</code> to "<code>-Xms10m -Xmx100m</code>" (no quotes)
+will tell the JVM to allocate 10 megabytes of RAM for the initial heap
+and set the maximum heap size to 100 megabytes.  For the curious, you
+can set <code>JAVA_OPTS</code> to "<code>-DDEBUG=true</code>" (no
+quotes) to see low-level debugging information on stderr.
+
+
+<a name="7"></a>
+<h2>7. Check the server</h2>
+<p>
+If the last line on your console after executing
+<code>runServer</code> is something like this:
+<p>
+<code>
+creating server socket.. (port 7777)
+</code>
+<p>
+then things are looking good.
+
+<p>
+To confirm that the server is accepting connections, try telnetting
+directly to the server port.  Type the command <code>/stats</code>
+followed by <code>/quit</code>.
+<p>
+<pre>
+$ telnet localhost 7777
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+/stats
+Stats for research.lyrisoft.com:7777
+  Number of rooms: 0
+  Number of users: 0
+  Uptime: 7.127 seconds
+
+Server JVM Stats:
+  Java version: 1.2.2 (Sun Microsystems Inc.)
+  Operating System: Linux
+  Memory Usage: 199 of 1023 KB free
+Other servers on this network:
+  none
+/quit
+Connection closed by foreign host.
+</pre>
+<p>
+Finally, check to see that logs are appearing where they should be
+(according to what <code>nfc.conf</code> says).
+
+<a name="8"></a>
+<h2>8. Run the client</h2>
+<p>
+The shell script $NFC_HOME/bin/runClient will run the client.  The
+client program requires 2 arguments, host and port, to be specified on
+the command line.  E.g.,
+<p>
+<code>$ /nfc/bin/runClient localhost 7777</code>
+
+<p>
+If this worked, then the NFC login prompt will appear on your
+display.  From there, you can log in and play with the program.
+
+<p>
+If you see a big stack trace, starting with something like the
+following, it means that you need to set the <code>DISPLAY</code>
+environment variable.  If unsure, try setting <code>DISPLAY</code> to
+"<code>localhost:0</code>" (no quotes).
+<p>
+
+<pre>
+Xlib: connection to "192.168.1.1:0.0" refused by server
+Xlib: Client is not authorized to connect to Server
+Exception in thread "main" java.lang.InternalError: Can't connect to
+X11 window server using '192.168.1.1:0' as the value of the DISPLAY variable.
+</pre>
+
+<p>
+
+<a name="9"></a>
+<h2>9. Make the chat web-accessible</h2>
+
+<p>
+First and foremost, due to the applet security model, an applet may
+only connect to the host from which it was downloaded.  What this
+means is that there must be an HTTP server running on the same machine
+that the chat server is running on.  (You can get around this by
+port-forwarding).
+
+
+<p>
+The <code>$NFC_HOME/web</code> directory includes the applet jar files
+as well as some basic HTML templates to initialize the applet.  Make
+this whole directory web accessible, either by copying the whole thing
+somewhere, or by explicitly putting it in your web server's config.
+
+<p>
+Here is an example applet tag that will start the NFC client in the
+browser:
+
+<p>
+<code>
+&lt;applet code="com.lyrisoft.chat.client.ChatClientApplet"<br>
+&nbsp;&nbsp;archive="chatclient.jar"<br>
+&nbsp;&nbsp;width="<em class="green">400</em>"<br>
+&nbsp;&nbsp;height="<em class="green">150</em>"&gt;<br>
+&lt;param name="port" value="<em class="green">7777</em>"&gt;<br>
+&lt;param name="guiFactory" value="<em class="green">com.lyrisoft.chat.client.gui.awt102.AppletGUIFactory</em>"&gt;<br>
+&lt;param name="bgColor" value="<em class="green">384CC7</em>"&gt;<br>
+&lt;param name="userColor" value="<em class="green">0000FF</em>"&gt;<br>
+&lt;param name="errorColor" value="<em class="green">FF0000</em>"&gt;<br>
+&lt;/applet&gt;<br>
+</code>
+
+<p>
+The values in green can be changed to match your taste or to adjust
+the look.  To use an alternate GUI, you would specify the classname of
+the alternate GUI "Factory".  NFC comes with one additional GUI
+factory that uses one large area embedded in the browser, instead of
+the typical multi-window display.  To specify the embedded GUI, use
+<code>com.lyrisoft.chat.client.gui.awt102.EmbeddedAppletGUIFactory</code>
+as the value for the <code>guiFactory</code> parameter.
+
+<p>
+At last, ensure that the server is still running from before, and if
+not, start it up again, then visit the URL containing your brand new
+chat.
+
+</body>
+</html>

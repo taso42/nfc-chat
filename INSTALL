@@ -1,0 +1,169 @@
+NFC CHAT INSTALLATION INSTRUCTIONS
+
+Prerequisites for NFC:
+Java Development Kit (http://java.sun.com/products/j2se/).  You will
+need version 1.2.2 or higher.  This is also known as J2SE (Java 2
+Standard Edition).  
+
+If you downloaded the source distribution, you will need to build it
+first.  Proceed to the SOURCE INSTALLATION section to read how to do
+this.  If you downloaded the binary distribution, skip to the section
+titled BINARY INSTALLATION.
+
+
+SOURCE INSTALLATION
+
+Prerequisites for building:
+Ant (http://jakarta.apache.org/ant/):  You will need Ant to build the
+software.  Ant is like Make, except it's specifically tailored for
+Java applications.
+
+Make sure that both Java and Ant are installed properly.  For Ant, you
+may have to set some environment variables like ANT_HOME and
+JAVA_HOME.  Follow the instructions provided with Ant, then return to
+this document.
+
+One Ant and Java are installed, cd into the NFC distribution directory
+and at your prompt, type:
+
+  ant build
+
+This will compile all the Java, create JAR files, and finally create a
+WAR file.
+
+
+BINARY INSTALLATION
+
+This section assumes that you have either downloaded the binary
+distribution of NFC, or built it yourself from source.  Place NFC into
+some directory where you like to install things, such as
+/usr/local/nfc-1.1.0 or ~/nfc-1.1.0.  From now on, we'll refer to the
+install directory as $NFC_HOME.
+
+You can insure that you have a properly built binary copy by looking
+for the following files:
+
+  $NFC_HOME/lib/chatserver.jar
+  $NFC_HOME/lib/chatclient_full.jar
+  $NFC_HOME/lib/chatclient_swing.jar
+  $NFC_HOME/lib/chatserver_flash.jar
+  $NFC_HOME/lib/chatclient_awt.jar
+  $NFC_HOME/webapps/nfc.war
+
+If these files exist, then you're in good shape.
+
+There are two modes of operation: Standalone server and
+Servlet-embedded server.  The Servlet-embedded server is preferred
+because it will enable http-tunneling mode, allowing users behind
+firewalls and proxies to connect to NFC.
+
+Decide which mode you want to run in, and then skip to the
+SERVLET-EMBEDDED MODE or STANDALONE-SERVER MODE section.
+
+
+SERVLET-EMBEDDED MODE
+
+To run in Servlet-embedded mode, you will need a Servlet engine.
+Tomcat is such an engine.  You can download Tomcat from
+http://jakarta.apache.org/tomcat.  Refer to the Tomcat instructions
+for installing Tomcat, then return to this document.
+
+Once Tomcat (or any modern servlet engine) is installed, you can
+install NFC by taking the $NFC_HOME/webapps/nfc.war file and copying
+it to the Tomcat webapps directory.  The webapps directory is
+typically $TOMCAT_HOME/webapps.  [If you're running something other
+than Tomcat, refer to the vendor's documentation to figure out how to
+deploy a WAR file.] 
+
+When the WAR is in place, restart the servlet engine.  
+
+Test the installation by connecting to Tomcat with your web browser.
+Tomcat usually listens for HTTP connections on port 8080 or 8081 by
+default, so you would use a URL like this:
+
+  http://your-host.com:8080/nfc/
+
+If you see the login page, congratulations!  
+
+
+STANDALONE-SERVER MODE
+
+You have to edit the file $NFC_HOME/bin/setenv.sh.  Find the line that
+says JAVA_HOME=, uncomment it and change it so it points to
+the path where Java is installed on your machine.
+
+Upon doing that, start the server with the command:
+
+  $NFC_HOME/bin/runServer
+  (make sure to substitue an actual path in place of $NFC_HOME)
+
+In case you get an error about wrong permissions for runServer or one 
+of the other scripts, make sure the script-files are executable by 
+  cd $NFC_HOME/bin
+  chmod u+x runServer setenv.sh runFlashServer runSwingClient runClient nfcpasswd loadtest
+  
+  
+THE CLIENT
+
+Here is some info on deploying and running the client.
+
+If you've installed the WAR file (Servlet-embedded mode), then you're
+already done, the WAR comes with the applet and HTML/JSP pages
+pre-bundled.  You can edit these pages as you see fit, or use them as
+examples to create your own.
+
+Note that by default, Tomcat will serve the index.jsp page to you.
+For a more simple example, see the file client.html (look under
+$TOMCAT_HOME/webapps/nfc/ to find this file).  The JSP pages are
+rather over-complicated.  If you're not understanding them, it's
+probably my fault; not yours.
+
+If you're running in standalone server mode, you should copy the
+contents of the $NFC_HOME/web directory onto your web server, and
+place the chatclient_awt.jar file there as well.  Try to fetch
+client.html from your webserver and see if it works.
+
+Finally, you can also run the client as a standalone application.
+Make sure that JAVA_HOME is set correctly in $NFC_HOME/bin/setenv.sh,
+and run either:
+  $NFC_HOME/bin/runClient host port
+    or
+  $NFC_HOME/bin/runSwingClient host port
+  
+Make sure to substitute an actual path in place of $NFC_HOME.  Note
+that the Swing client is buggy and not fully working.
+
+
+ADVANCED CONFIGURATION
+
+This section explains how to change things like the default language,
+the listening port, and authentication.
+
+All of the configuration is in a directory named conf.  In servlet
+mode, use the conf directory in $TOMCAT_HOME/webapps/nfc/conf;  In
+standalone mode, use the conf directory in $NFC_HOME/conf.  In conf,
+you will find a file called nfc.conf.  This is the main configuration
+file.  You can easily change the listen port here.  To switch the
+server to a new language, change the "commands" and "messages"
+variables to point to alternate files.  For example
+
+commands=conf/commands.italian.properties
+messages=conf/messages.italian.properties
+
+Will make the server speak italian instead of english.  To add a
+whole new language, start with existing messages.properties and
+commands.properties, copy them to messages.[somelanguage].properties
+and commands.[somelanguage].properties, edit them, and then edit
+nfc.conf to point to them.
+
+You will also need to change the messages.properties file for the
+client.  This file exists under the resources directory.  For the
+client, instead of editing a conf file, just copy
+messages.[somelanguages].properties on top of messages.properties, and
+the client will use those messages instead.
+
+Custom Authentication
+[todo]
+
+Running or joining a distributed server network
+[todo]

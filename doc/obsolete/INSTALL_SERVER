@@ -1,0 +1,52 @@
+Installing/Running the NFC Server
+
+Unfortunately, there is not yet any very simple
+"configure/make/make-install" way of installing NFC.  However, if you
+have the JDK1.2 (aka "The Java 2 Platform") installed and you are on a
+unix-like operating system, installation is easy.
+
+Prerequisites:
+o JDK1.2.x - absolutely needed to run the server.  
+o Bourne shell (/bin/sh) - needed for the scripts to work
+o Make - needed to compile
+
+Optional:
+o JDK1.0.2 - if you have this old JDK, you can set the Makefile to use
+  it when compiling the client.  This ensures that the client is
+  compatible with Java 1.0.2.  We maintain compatability with this
+  ancient Java version because it is the only version that can reliably
+  be run in most web browsers.
+
+STEP 1:
+Edit the Makefile.  Ensure that JAVAC, JAVA10C, JAVA10CP, JAR, and
+JAVADOC are all set and pointing to the correct place.  There are
+comments in the Makefile that explain each variable.
+
+STEP 2:
+Build the jars by typing 'make'.  If the Makefile is in proper shape
+you will have ended up with 3 jar files in the lib directory.
+
+STEP 3:
+Edit the setenv.sh bootstrap script.  The setenv.sh script can be
+found in the bin directory.  Just ensure that JAVA_HOME points to the
+top-level directory of your __JDK1.2__ installation.
+
+STEP 4 (optional):
+Edit the nfc.conf file, found in the adm directory.  The most
+important thing here is that the auth class is set.  The
+'PasswdAuthenticator' is used per default.  Optionally, you may use
+the 'JdbcAuthenticator' to authenticate users via a database.
+In addition, you can set the log and error log paths.  If these are
+commented, NFC will log messages to stdout and errors to stderr.
+
+STEP 5:
+Run the the server.  Assuming everything is set up correctly, you can
+now kick off the server using the runServer script (in the bin
+directory).  It requires one command line argument: a port number to
+listen on.  E.g.,
+$ ./bin/runServer 8199 &
+
+The log should tell you whether or not NFC has started properly.
+
+
+

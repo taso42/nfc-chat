@@ -1,0 +1,8 @@
+#!/bin/sh
+# runClient
+# This script runs the NFC client with an AWT GUI as a stand-alone app.
+# You can use any Java version for this.
+# See setenv.sh
+
+. `dirname $0`/setenv.sh
+$JAVA_HOME/bin/java -DNFC_HOME=$NFC_HOME com.lyrisoft.chat.client.Main $*

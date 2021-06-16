@@ -1,0 +1,5 @@
+Note to Windows users:  nfc-win.conf should be copied on top of
+nfc.conf if you're running on a Windows box in Standalone mode.  If
+you're using the servlet-embedded mode, then you don't need to worry
+about this.
+

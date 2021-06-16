@@ -1,0 +1,10 @@
+#!/bin/sh
+# runFlashServer
+# This script starts the NFC chat server for Flash clients.
+# Note that if you run this server, you can not use the Java clients.
+# See setenv.sh
+
+. `dirname $0`/setenv.sh
+CMD="$JAVA_HOME/bin/java $JAVA_OPTS -DDEBUG=true -DNFC_HOME=$NFC_HOME com.ajdigital.chat.server.remote.FlashChatServer $*" 
+echo executing $CMD
+exec $CMD

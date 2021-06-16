@@ -1,0 +1,2 @@
+Main-Class: com.lyrisoft.chat.server.remote.ChatServer
+

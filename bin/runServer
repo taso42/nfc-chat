@@ -1,0 +1,9 @@
+#!/bin/sh
+# runServer
+# This script starts the NFC chat server.
+# See setenv.sh
+
+. `dirname $0`/setenv.sh
+CMD="$JAVA_HOME/bin/java $JAVA_OPTS -DNFC_HOME=$NFC_HOME com.lyrisoft.chat.server.remote.ChatServer $*"
+echo executing $CMD
+exec $CMD

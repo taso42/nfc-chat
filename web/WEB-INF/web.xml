@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+    "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app>
+  <servlet>
+    <!-- Load the TunnelServlet at startup.  It will kick off the chat server. -->
+    <servlet-name>tunnel</servlet-name>
+    <servlet-class>com.lyrisoft.chat.server.remote.TunnelServlet</servlet-class>
+
+    <!-- Choose chatServerClass: default(com.lyrisoft.chat.server.remote.ChatServer) or flash (com.ajdigital.chat.server.remote.FlashChatServer)-->
+    <init-param>
+  	    <param-name>chatServerClass</param-name>
+        <param-value>com.lyrisoft.chat.server.remote.ChatServer</param-value>
+        <description>ChatServer-Class</description>
+    </init-param>
+
+    <!-- Set the path to the configuration file from WEB-INF. Defaults to conf/nfc.conf. -->
+    <init-param>
+  	    <param-name>config</param-name>
+        <param-value>conf/nfc.conf</param-value>
+        <description>Location of the configuration file</description>
+    </init-param>
+
+    <load-on-startup>1</load-on-startup>
+
+   <!-- Bind the servlet to the url /tunnel -->
+  <servlet-mapping>
+    <servlet-name>tunnel</servlet-name>
+    <url-pattern>/tunnel</url-pattern>
+  </servlet-mapping>
+
+  </servlet>
+</web-app>

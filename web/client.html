@@ -1,0 +1,33 @@
+<html>
+<head><title>NFC Chat</title></head>
+<body bgcolor="#ffffff" text="#000000">
+
+<table border="0">
+  <tr>
+    <td align="center"><font size="+2"><b>NFC Chat Demo</b></font></td>
+  </tr>	
+  <tr>
+    <td>
+      <applet code="com.lyrisoft.chat.client.ChatClientApplet"
+	archive="chatclient_awt.jar"
+        width="400"
+        height="150">
+      <param name="port" value="7777">
+      <param name="guiFactory" value="com.lyrisoft.chat.client.gui.awt102.AppletGUIFactory">
+      <param name="bgColor" value="6299CD">
+      <param name="userColor" value="0000FF">
+      <param name="errorColor" value="FF0000">
+      <param name="messages" value="messages.properties">
+      </applet>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <small>Powered by <a href="http://nfcchat.sourceforge.net/">NFC</a></small><br>
+      <small>Copyright (c) 2000-2002 Lyrisoft Solutions, Inc.</small>
+    </td>
+  </tr>	
+</table>  
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+/*
+   StyleSheet for NFC protocol documentation 
+   $Id: style.css,v 1.3 2000/10/04 07:13:02 taso Exp $ 
+*/
+
+A:link {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  color: blue;
+  background: #ffffff;
+}
+
+A:visited {
+  color: blue;
+  background: #ffffff;
+}
+
+PRE {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+CODE {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+BODY {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  color: black;
+  background: #ffffff;
+}
+
+P {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: small;
+}
+
+H1, H2, H3, H4, H5, H6 {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+SMALL {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+TD {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: smaller;
+}
+
+UL, OL, DL, DT {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: small;
+}
+
+DT.head {
+  font-weight: bold;	
+}
+
+H3.event {
+  color: green;
+  text-transform: uppercase;
+  background: #ffffff;
+}
+
+EM {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-style: normal; /* we'll customize it ourselves */
+  font-size: small;
+}
+
+TD {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  vertical-align: top;
+}
+
+SUP {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: small;
+}
+
+.highlight {
+  background: yellow;
+  font-weight: bold;
+  color: black;
+}
+
+.green {
+  color: green;
+  background: #ffffff;
+}
+
+.event {
+  color: green;
+  text-transform: uppercase;
+  font-weight: bold;
+  background: #ffffff;
+}
+
+.command {
+  color: red;
+  background: #ffffff;
+}
+
+.todo {
+  color: red;
+  font-weight: bold;
+  background: #ffffff;
+}

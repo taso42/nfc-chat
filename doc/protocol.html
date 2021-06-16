@@ -1,0 +1,860 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+      "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>NFC Documentation - Protocol</title>
+  <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+</head>
+<body>
+
+<h1>NFC Protocol Specification</h1>
+
+<p>
+This document provides an overview of the protocol used in the NFC network.
+
+<h2>Revision history</h2>
+<blockquote>
+<table border=1 width="90%">
+  <tr>
+    <td><b>version</b></td>
+    <td><b>date</b></td>
+    <td><b>description</b></td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>9/27/2000</td>	
+    <td><p>Documenting the existing protocol, and adding additional
+commands/events for the distributed protocol.  I am taking the liberty
+of renaming some commands and changing syntax for the sake of
+clarity.
+    </td>
+  </tr>
+</table>
+<p>When this document and NFC are finally in sync, the result will be
+"NFC version 1.0." 
+</blockquote>
+
+<p>
+Recently NFC has changed from a monolithic server/client application to
+a distributed application using the publish/subscribe paradigm.
+Multiple servers collaborate to create a larger, distributed chat
+network.  From a client's perspective, the network looks like one big
+server.  The <a target="_parent" href="http://java.sun.com/products/jms/">Java Message
+Service (JMS)</a> is used to distribute messages across NFC servers.
+NFC servers then use the NFC engine to distribute messages to their
+clients.  There are three different entities, or nodes, in an NFC
+network, and they interconnect in the following way:
+
+<ul>
+  <li><b>NFC clients</b> make a single connection to a single server
+  <li><b>NFC servers</b> accept connections from multiple clients and
+      optionally make a single connection to a single router and
+      subscribes to a JMS <b>topic</b>.
+  <li><b>JMS routers</b> accept connections from multiple servers and
+      optionally make connections to other routers.
+</ul>
+
+<p>
+JMS is just a general Messaging API Specification, not an
+implementation.  NFC relies only on the specification, hence any JMS
+1.0.2 compliant implementation can be used on the network.  Currently,
+the developers use a product called SwiftMQ for the JMS
+implementation.
+
+<p>
+Information and diagrams about SwiftMQ can be found on
+the <a target="_parent" href="http://www.swiftmq.com/">SwiftMQ site</a>.
+
+<p>
+Information about the JMS Specification can be found on <a target="_parent" 
+href="http://java.sun.com/products/jms/">Sun's website</a>.
+
+<p>
+When consulting JMS documentation, please note that in JMS terms, an NFC
+server is a JMS client.  The NFC client is completely unaware that JMS
+is being used; it relies only on the NFC protocol.
+
+<p>
+Regardless of how they are connected to each other, all the nodes in
+an NFC network communicate using the NFC Protocol.
+
+
+<a name="commands"></a><h2>Commands</h2>
+<p>
+Each node in an NFC network, whether it is a client or server,
+communicates to the other nodes via commands.  The following is the
+NFC 1.0 command set.
+<p>
+A command is a sequence strings separated by tabs and ending with a newline.
+
+<p>
+
+<a name="client-server1"></a>
+<table border=0 width="75%">
+  <tr>
+    <td colspan=2><i><em class="highlight">client to
+    server</em></i><br> Messages that a client may send to its server
+    </td>
+  </tr>	
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><a name="signon1"></a><em class="command">/signon</em> user (password)</td>
+    <td>signon</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued after establishing a connection.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><a name="signoff1"></a><em class="command">/signoff</em></td>
+    <td>signoff</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued when the user explicitly logs out.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/rooms</em></td>
+    <td>request list of all rooms</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/users</em></td>
+    <td>request a list of all users</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/who</em> room</td>
+    <td>request a list of users in the specified room</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.  Typically issued once, immediately after receiving an /ack_join
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/join</em> room (password)</td>
+    <td>join a room</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.  If the the client is already in this room, the server silently ignores.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/part</em> room</td>
+    <td>part a room</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.  If the the client is not in this room, the server silently ignores.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/ping</em> user arg</td>
+    <td>"ping" a user</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued at any time.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/pong</em> user arg</td>
+    <td>"pong" a user (reply to a ping)</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued as a reply to an incoming /ping.  The reply is
+    <b>required</b>.  The arg should be identical to the arg issued in
+    the incoming ping.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+</table>  
+<p>
+
+<a name="server-client1"></a>
+<table border=0 width="75%">
+  <tr>
+    <td colspan=2><i><em class="highlight">server to client</em></i><br>
+    Messages that a server may send to a local client  
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/ack_signon</em> username</td>
+    <td>signon acknowledgement</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Issued if the client's credentials were verified.  The server
+    may send back a different username than the one in the
+    /signon request if it is so configured.  In case they differ, the
+    client should use the username in the ack_signon.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/rooms</em> room1 (room2 ...)</td>
+    <td>reply (ack) to /rooms request</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    The reply list contains all the known rooms on the whole network.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/users</em> user1 (user2 ...)      </td>
+    <td>reply (ack) to /users request</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    The reply list contains all the known user on the whole network.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/who</em> room user1 (user2 ...)   </td>
+    <td>reply (ack) to /who request</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    The reply list contains all the known users in the specified room,
+    over the whole network.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/ack_join</em> room</td>
+    <td>reply (ack) to /join request</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Similar to ack_signon, the room arg may contain some name other
+    than the one that was specified.  If so, the client should use the
+    name from the ack_join.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+
+  <tr>
+    <td><em class="command">/ack_part</em> room</td>
+    <td>reply (ack) to /part request</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Note that the room arg here will NOT differ from the one in the
+    /part request.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/ping</em> user arg</td>
+    <td>deliver a "ping" to a user</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    The server will send a ping for two different reasons.  First is
+    if one client is pinging another;  in that case the server will
+    relay the ping.  Second, the server itself periodically pings all
+    of its clients, to determine if any have gone stale.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/pong</em> user arg</td>
+    <td>deliver a "pong" (ping reply) to a user</td>
+  </tr>
+  <tr>
+    <td colspan=2>
+    Sent when the server is relaying a pong from one client to
+    another.
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+</table>
+<p>
+
+<a name="server-allclients1"></a>
+<table border=0 width="75%">
+  <tr>
+    <td colspan=2><i><em class="highlight">server to ALL local
+    clients</em></i><br>
+    Messages that a server may "broadcast" to all of its clients<a
+    name="1source"></a><a class="footnote" href="#1"><sup>1</sup></a>
+    </td>
+  </tr>	
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/user</em> +|- user</td>
+    <td>indicates that somebody has logged on (+) or off (-)</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/room</em> +|- room</td>
+    <td>indicates that a room has been created (+) or destroyed (-)</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/roomuser</em> room +|- user [is_signoff]</td>
+    <td>indicates that somebody has joined (+) or parted (-) a room</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+</table>  
+<p>
+
+<a name="server-server1"></a>
+<table border=0 width="75%">
+  <tr>
+    <td colspan=2><i><em class="highlight">server to ALL servers
+    (JMS Topic broadcast)</em></i><br>
+    Messages that a server may "broadcast" to all of the other servers
+    (through JMS).  All of the following commands include the
+    name of the originating server as an implicit argument
+    </td>
+  </tr>    
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/hello</em></td>
+    <td>A server is announcing itself.  The server sends this message
+	immediately after establishing a connection with the router.</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/signon</em> user</td>
+    <td>A server is informing the others that there has been a signon.</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/ping</em> user arg</td>
+    <td>Relay a ping for a user that is not local</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/pong</em> user arg</td>
+    <td>Relay a pong for a user that is not local</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/rooms</em> room1 (room2 ...)</td>
+    <td>broadcast the list of local rooms</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/users</em> user1 (user2 ...)</td>
+    <td>broadcast the list of local users</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/who</em> room user1 (user2 ...)</td>
+    <td>broadcast the state of a local room</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+  <tr>
+    <td><em class="command">/users</em> user1 (user2 ...)</td>
+    <td>broadcast the list of local users</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>	
+</table>  
+<p>
+
+<a name="events"></a><h2>Events</h2>
+<p>
+On a high level, a command and it's effects can be thought of as "Events".
+Below is a list of various NFC events in terms of commands that are
+sent and the actions they cause.
+<p>
+A few notes about the format of this section.  First, the args are
+omitted from the commands to avoid clutter.  Next, although in most
+cases a command and it's reply are both shown, keep in mind that
+repliess always occur asynchronously.  Finally, note that some commands
+have the same names, but different syntax depending on context
+(client-to-server, server-to-client, server-to-server). 
+
+<p>
+
+<a name="client-initiated-events"></a><h3 class="highlight">client
+initiated events</h3>
+<h3 class="event">SIGNON</h3><p> Client wishes to log on to NFC.
+<dl>
+  <dt><b>Cause</b>
+      <dd><dl>
+	    <dt>Client sends to server
+            <dd><em class="command">/signon</em>
+      	  </dl>
+  <dt><b>Effect</b>
+      <dd><dl>
+	    <dt>The server authenticates the user and ultimately sends
+		back to the client
+            <dd><em class="command">/signon</em>
+          </dl>
+      <dd><dl>
+	    <dt>The server sends to the router
+            <dd><em class="command">/signon</em>
+          </dl>
+      <dd><dl>
+	    <dt>The server sends to all clients
+            <dd><em class="command">/user</em> +
+          </dl>
+<!--  <dt><b>Chained Events</b>
+      <dd>The server who gets this signon will initiate a <em
+	  class="event">SIGNON</em> event. -->
+  <dt><b>Notes</b>
+      <ul>
+            <li>If the user fails authentication, an error will be sent to
+	  the client instead of the /signon reply.
+            <li>The username that the server returns in the /signon reply
+	  may not necessarily be the same username that the client
+	  specified.  This would typically happen in the case that the
+	  client sends a special user "id", and the server looks up
+	  the appropriate screen name for that id.
+            <li>A client will typically initiate <em class="event">GET_ROOM_LIST</em> and
+		<em class="event">GET_USER_LIST</em> right after
+		receiving an signon ack.		
+      </ul>	
+</dl>
+
+<h3 class="event">SIGNOFF</h3><p> Client wishes to log out of NFC.
+<dl>
+  <dt><b>Cause</b>
+      <dd><dl>
+	    <dt>Client sends to server
+	    <dd><em class="command">/signoff</em>
+          </dl>		
+  <dt><b>Effect</b>
+      <dd><dl>
+	    <dt>The server sends to the router
+            <dd><em class="command">/signoff</em>
+          </dl>
+      <dd><dl>
+	    <dt>The server sends to all clients
+            <dd><em class="command">/user</em> -
+          </dl>
+  <dt><b>Chained Events</b>
+      <dd>The server who gets this signon will initiate a <em
+	  class="event">SIGNOFF</em> event.
+  <dt><b>Notes</b>
+      <dd>There is no ack to the client for a /signoff.  Instead of
+	  sending back an ack messgae, the server will simply close
+	  the connection.
+</dl>
+   
+
+<h3 class="event">GET_ROOM_LIST</h3><p> Client requests the list of all the rooms that currently exist.
+<dl>
+  <dt><b>Cause</b>
+      <dd><dl>
+	    <dt>Client sends to server
+            <dd><em class="command">/rooms</em>
+          </dl>
+  <dt><b>Effect</b>
+      <dd><dl>
+	    <dt>Server sends to client
+            <dd><em class="command">/rooms</em>
+          </dl>		
+  <dt><b>Notes</b>
+      <dd>The server will return the list of ALL the known rooms, even
+	  if some rooms exist only on other servers
+</dl>
+
+<h3 class="event">GET_USER_LIST</h3><p> Client requests the list of
+all the users who are currently logged in.
+<dl>
+  <dt><b>Cause</b>
+      <dd><dl>
+	    <dt>Client sends to server
+            <dd><em class="command">/users</em>
+          </dl>
+  <dt><b>Effect</b>
+      <dd><dl>
+	    <dt>Server sends to client
+            <dd><em class="command">/users</em>
+          </dl>		
+  <dt><b>Notes</b>
+      <dd>The server will return the list of ALL the known users,
+	  including the users who are logged in to other servers.
+</dl>
+
+<h3 class="event">JOIN_ROOM</h3><p> Client attempts to join a room
+<dl>
+  <dt><b>Cause</b>
+      <dd><dl>
+	    <dt>Client sends to server
+            <dd><em class="command">/join</em>
+          </dl>
+  <dt><b>Effect</b>
+      <dd><dl>
+	    <dt>Server sends to client
+            <dd><em class="command">/ack_join</em>
+          </dl>		
+      <dd><dl>
+	    <dt>If this is a newly created room, server sends to all clients
+            <dd><em class="command">/room</em> +
+          </dl>		
+      <dd><dl>
+	    <dt>Server sends to all clients who are in the room
+            <dd><em class="command">/roomuser</em>
+          </dl>		
+      <dd><dl>
+	    <dt>Server sends to the router
+            <dd><em class="command">/join</em>
+          </dl>		
+<!--  <dt><b>Chained Events</b>
+      <dd>The server who gets this signon will initiate a <em
+	  class="event">USER_JOINED_ROOM</em> event. -->
+  <dt><b>Notes</b>
+      <ul>
+        <li>As with the /signon command, an error might be returned
+	  ("wrong room password", etc) instead of the ack.  Also
+	  similar to the /signon command, the roomname argument in the
+	  ack may differ from the argument given by the client in case
+	  id's are being used instead of literal names.
+        <li>The client will typically make a <em class="event">GET_ROOM_USER_LIST</em> request
+	  after receiving it's ack.
+      </ul>	    
+</dl>
+
+<h3 class="event">PART_ROOM</h3><p> Client leaves a room<p>
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Client sends to server
+        <dd><em class="command">/part</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Server sends to client
+        <dd><em class="command">/ack_part</em>
+      </dl>
+      <dl>
+        <dt>Server sends to router
+        <dd><em class="command">/part</em>
+      </dl>
+      <dd><dl>
+	    <dt>Server sends to all clients who are in the room
+            <dd><em class="command">/roomuser</em>
+          </dl>		
+      <dl>
+        <dt>If the room is now empty, server sends to all clients
+        <dd><em class="command">/room</em> -
+      </dl>
+  <dt><b>Chained Events</b>
+      <dd>The server who gets this signon will initiate a <em
+	  class="event">USER_PARTED_ROOM</em> event.
+</dl>
+
+<h3 class="event">GET_ROOM_USER_LIST</h3><p> Client request the list of users in a room<p>
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Client sends to server
+        <dd><em class="command">/who</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Server sends to client
+        <dd><em class="command">/who</em>
+      </dl>
+  <dt><b>Notes</b>
+      <dd>The server will return the list of all the users in the
+	  room, even if none of the users currently in the room are
+	  local. 
+</dl>
+
+<pre>
+todo:
+[ROOM_MSG]
+[ROOM_EMOTE]
+[PRIV_MSG]
+</pre>
+
+<a name="server-initiated-events"></a><h3 class="highlight">server
+initiated events</h3>
+<h3 class="event">HELLO</h3><p> A server wishes to announce its
+participation in the network
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/hello</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Each receiving server will add the server to their list of
+	    known servers.
+      </dl>
+  <dt><b>Chained Events</b>
+      <dd>
+	  <li>The sender and all the recipients should <em
+	      class="event">BROADCAST_ROOM_LIST</em> and <em
+	      class="event">BROADCAST_USER_LIST</em> following the <em
+	      class="event">HELLO</em> event.  The sender can do this
+	      immediately after sending.  The recipients should make
+	      their broadcasts upon receipt of the sender's hello.
+</dl>
+
+<h3 class="event">BROADCAST_ROOM_LIST</h3><p> A server broadcasts a list of
+all its local rooms
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/rooms</em>
+        <dt>For each room, server sends to JMS Topic
+        <dd><em class="command">/who</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>If the sender is unknown (new) to the recipient, then
+	    update state tables accordingly.  Otherwise, they should
+	    already be up to date.
+      </dl>
+</dl>
+
+<h3 class="event">BROADCAST_USER_LIST</h3><p> A server broadcasts a list of
+all its local users
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/users</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>If the sender is unknown (new) to the recipient, then
+	    update state tables accordingly.  Otherwise, they should
+	    already be up to date.
+      </dl>
+</dl>
+<!--
+<h3 class="event">SIGNON</h3><p> A server informs the Topic that
+somebody has logged in.
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/signon</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Each recipient server will update its state tables.
+      </dl>
+</dl>
+
+<h3 class="event">SIGNOFF</h3><p> A server informs the Topic that
+somebody has logged out.
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/signoff</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Each recipient server will update its state tables.
+      </dl>
+</dl>
+
+<h3 class="event">USER_JOINED_ROOM</h3><p> A server informs the Topic that
+somebody has joined a room.
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/join</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Each recipient server will update its state tables.
+      </dl>
+</dl>
+
+<h3 class="event">USER_PARTED_ROOM</h3><p> A server informs the Topic that
+somebody has joined a room.
+<dl>
+  <dt><b>Cause</b>
+  <dd>
+      <dl>
+        <dt>Server sends to JMS Topic
+        <dd><em class="command">/part</em>
+      </dl>
+  <dt><b>Effect</b>
+  <dd>
+      <dl>
+        <dt>Each recipient server will update its state tables.
+      </dl>
+</dl>
+-->
+
+<hr noshade>
+<h5>The server table is a table containing the following tuples</h5>
+<table border=1>
+  <tr>
+    <td>name of server</td>
+    <td>server record</td>
+  </tr>
+</table>
+
+<h5>The room table is a table containing the following tuples</h5>
+<table border=1>
+  <tr>
+    <td>name of room</td>
+    <td>list of users</td>
+  </tr>
+</table>  
+
+<h5>The server record is a record containing</h5>
+<table border=1>
+  <tr>
+    <td>List of all local users</td>
+  </tr>
+  <tr>
+    <td>List of all local rooms</td>
+  </tr>
+</table>
+
+<hr>
+<h3>Future directions</h3>
+<p>
+Let each server dynamically create a JMS queue for itself.  This will allow other
+servers to send messages "directly" to that server, instead of to the
+whole JMS topic.  This would come in handy for relaying messages that are
+destined for specific users.
+
+<p>
+
+Explore the possibility of also making a queue for each room.  
+
+
+<hr noshade>
+<h3>Notes</h3>
+<ol>
+<a name="1"></a><a href="#1source"><li></a>A "broadcast" to all
+    clients is quite different than a broadcast to all servers.
+    Broadcasts to servers are sent using JMS, whereas broadcasts to
+    clients are done "manually" by a server, by iterating over the list of all
+    local clients.  There are exceptions to "all". For instance, if
+    we're broadcasting the fact that a user named "Charlie" just
+    joined a room called "FunRoom" (a /roomuser command), only the
+    clients who are currently participating in "FunRoom" will be sent
+    the message.
+</ol>
+<p>
+<small>    
+Copyright &copy; 2000 Lyrisoft Solutions, Inc.<br>
+$Id: protocol.html,v 1.3 2000/10/04 07:13:02 taso Exp $
+</small>    
+
+</body>
+</html>
+
+    

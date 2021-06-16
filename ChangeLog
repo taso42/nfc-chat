@@ -1,0 +1,618 @@
+2004-04-27 release 1.1.0, notes taken from sourceforge release notes
+
+	Major changes and enhancements from nfc 1.0.8 to 1.1.0:
+	
+	* new lightweight java-chatclient: Carnageblender
+	
+	* IgnoreList can be saved on the server-side
+	* custom ignorelist-stores are possible (a jdbc-based one is included)
+	* custom room-authenticator possible (a jdbc-based one is included)
+	
+	* kick users from room for configureable timeout
+	* kill (ban) users from server for configureable timeout
+	
+	* only users with accessLevel >=GOD or the operators can kill/kick other users (1.0.8: only operators)
+	* local signon with same userid kills old local signons (only for JMS: new signon is denied if userid is still signed on to another JMS-connected server)
+	* auth.allowGuests, auth.storeGuests were moved from jdbc.conf to nfc.conf
+	* authenticator-classes used in nfc.conf were moved to the new package com.lyrisoft.chat.server.remote.persistence.auth
+	
+	
+	
+	Some details for developers:
+	
+	* reworked synchronization in DistributedState
+	* cleaned up import-statements
+	* restructured, enhanced package com.lyrisoft.chat.server.remote.auth and moved to com.lyrisoft.chat.server.remote.persistence.auth 
+	* roomAuthenticator can forbid creation of new rooms
+	* all message-construction is done in CommandMakerRemote
+	* new command: "/ignorelist" returns list of ignored users
+	* FlashChatServer can be used as servlet (1.0.8: stand-alone only)
+
+
+2002-11-24 release 1.0.8, notes taken from slashdot release notes
+	* Some bugs related to logging have been fixed. Logging when running as servlet now works correctly.
+
+	* Database authentication has been enhanced. You can now restrict access to only users in the database and you can use
+	 password encryption on dbms's other than MySQL. There is a document about database authentication in the doc directory.
+
+	* Some bugs in the startup scripts have been fixed.
+
+	* Zip files added to the release for convinience.
+
+	* The format of the jdbcAuth file has changed slightly.
+
+2002-03-03  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/conf/ldapAuth.conf, /cvsroot/nfcchat/nfcchat/conf/nfc.conf, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/jndi/LdapAuth.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/jndi/LdapAuthenticator.java:
+	Incorporated Marty Lee's LDAP Authentication module
+
+	* /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/jdbc/Jdbc.java:
+	prefixed config file with "conf/"; necessary due to recent changes in PropertyTool
+
+2002-02-21  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/bin/setenv.sh:
+	added chatserver_flash.jar to the classpath
+
+	* /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashChatServer.java:
+	nfc.conf is now looked for in the right place ("conf/nfc.conf" instead of just "nfc.conf")
+
+2002-02-20  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/bin/runFlashServer.bat:
+	corrected error in classpath setting
+
+2002-02-10  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/launcher.jsp:
+	added note the that form can be left blank
+
+2002-02-09  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: copying INSTALL for dist build
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: version 1.0.7
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: notjavadoccing the ruchat stuff
+
+	* /cvsroot/nfcchat/nfcchat/ChangeLog: *** empty log message ***
+
+	* /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/command/Ignore.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/command/UnIgnore.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/ChatClient.java:
+	applied changes from Maarten van Hoof (maarten@singularit.com) that fix ignore/unignore
+
+	* /cvsroot/nfcchat/nfcchat/doc/index.html, /cvsroot/nfcchat/nfcchat/doc/obsolete/index.html:
+	*** empty log message ***
+
+	* /cvsroot/nfcchat/nfcchat/bin/runServer.bat, /cvsroot/nfcchat/nfcchat/bin/setenv.sh.in, /cvsroot/nfcchat/nfcchat/conf/README, /cvsroot/nfcchat/nfcchat/web/client.html, /cvsroot/nfcchat/nfcchat/web/client.jsp, /cvsroot/nfcchat/nfcchat/INSTALL, /cvsroot/nfcchat/nfcchat/INSTALL.windows, /cvsroot/nfcchat/nfcchat/README, /cvsroot/nfcchat/nfcchat/build.xml:
+	README file, and some doc touch-ups
+
+	* /cvsroot/nfcchat/nfcchat/bin/setenv.sh, /cvsroot/nfcchat/nfcchat/doc/TODO, /cvsroot/nfcchat/nfcchat/doc/install.html, /cvsroot/nfcchat/nfcchat/doc/obsolete/install.html, /cvsroot/nfcchat/nfcchat/doc/obsolete/style.css, /cvsroot/nfcchat/nfcchat/ChangeLog, /cvsroot/nfcchat/nfcchat/INSTALL, /cvsroot/nfcchat/nfcchat/build.xml:
+	install docs
+
+	* /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/ChatServer.java:
+	commented out some println's
+
+	* /cvsroot/nfcchat/nfcchat/web/client.html, /cvsroot/nfcchat/nfcchat/web/launcher.jsp:
+	this blue is better
+
+	* /cvsroot/nfcchat/nfcchat/web/client.html, /cvsroot/nfcchat/nfcchat/web/launcher.jsp:
+	slightly less annoying shade of blue
+
+	* /cvsroot/nfcchat/nfcchat/bin/setenv.sh, /cvsroot/nfcchat/nfcchat/conf/nfc.conf, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/ChatServer.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/TunnelServlet.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/Passwd.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/io/ResourceLoader.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/properties/PropertyTool.java, /cvsroot/nfcchat/nfcchat/web/applet.jsp, /cvsroot/nfcchat/nfcchat/web/client.jsp, /cvsroot/nfcchat/nfcchat/web/status.jsp, /cvsroot/nfcchat/nfcchat/.cvsignore, /cvsroot/nfcchat/nfcchat/build.xml:
+	i think the war works...
+
+	* /cvsroot/nfcchat/nfcchat/bin/setenv.sh, /cvsroot/nfcchat/nfcchat/web/WEB-INF/web.xml, /cvsroot/nfcchat/nfcchat/web/applet.jsp, /cvsroot/nfcchat/nfcchat/web/client.jsp, /cvsroot/nfcchat/nfcchat/web/index.jsp, /cvsroot/nfcchat/nfcchat/web/launcher.jsp, /cvsroot/nfcchat/nfcchat/web/status.jsp, /cvsroot/nfcchat/nfcchat/build.xml:
+	build war works
+	running war doesn't work
+
+	* /cvsroot/nfcchat/nfcchat/web/WEB-INF/web.xml: oops
+
+	* /cvsroot/nfcchat/nfcchat/web/WEB-INF/web.xml:
+	*** empty log message ***
+
+2002-02-08  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: typo
+
+	* /cvsroot/nfcchat/nfcchat/lib/.cvsignore: *** empty log message ***
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: added header comment
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: using patternsets
+
+	* /cvsroot/nfcchat/nfcchat/.deps_awt, /cvsroot/nfcchat/nfcchat/.deps_client, /cvsroot/nfcchat/nfcchat/.deps_server, /cvsroot/nfcchat/nfcchat/.deps_server_flash, /cvsroot/nfcchat/nfcchat/.deps_swing, /cvsroot/nfcchat/nfcchat/ChangeLog, /cvsroot/nfcchat/nfcchat/TODO, /cvsroot/nfcchat/nfcchat/build.xml:
+	removed the .deps stuff
+	the flash jar is now being built
+
+	* /cvsroot/nfcchat/nfcchat/build.xml:
+	once again, all the individual jars are being built
+
+2002-02-08  taso@crud.localnet  <taso@crud>
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: typo
+
+	* /cvsroot/nfcchat/nfcchat/lib/.cvsignore: *** empty log message ***
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: added header comment
+
+	* /cvsroot/nfcchat/nfcchat/build.xml: using patternsets
+
+	* /cvsroot/nfcchat/nfcchat/.deps_awt, /cvsroot/nfcchat/nfcchat/.deps_client, /cvsroot/nfcchat/nfcchat/.deps_server, /cvsroot/nfcchat/nfcchat/.deps_server_flash, /cvsroot/nfcchat/nfcchat/.deps_swing, /cvsroot/nfcchat/nfcchat/ChangeLog, /cvsroot/nfcchat/nfcchat/TODO, /cvsroot/nfcchat/nfcchat/build.xml:
+	removed the .deps stuff
+	the flash jar is now being built
+
+	* /cvsroot/nfcchat/nfcchat/build.xml:
+	once again, all the individual jars are being built
+
+	* /cvsroot/nfcchat/nfcchat/TODO: added
+
+	* /cvsroot/nfcchat/nfcchat/.cvsignore, /cvsroot/nfcchat/nfcchat/doc/.cvsignore, /cvsroot/nfcchat/nfcchat/lib/.cvsignore:
+	cvsignore files
+
+	* /cvsroot/nfcchat/nfcchat/Makefile, /cvsroot/nfcchat/nfcchat/env.eg, /cvsroot/nfcchat/nfcchat/ChangeLog:
+	bold move: got rid of Makefile
+	auto-updated ChangeLog
+
+	* /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/client/command/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/client/gui/awt102/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/client/gui/jfc/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/client/gui/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/client/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/local/command/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/local/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/ChatClient.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/jdbc/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/auth/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/command/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/test/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/i18n/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/io/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/util/properties/package.html, /cvsroot/nfcchat/nfcchat/src/jfd/package.html, /cvsroot/nfcchat/nfcchat/bin/setenv.sh, /cvsroot/nfcchat/nfcchat/lib/jms.jar, /cvsroot/nfcchat/nfcchat/lib/jndi.jar, /cvsroot/nfcchat/nfcchat/lib/servlet.jar, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/auth/mysql/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/awt/package.html, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/package.html, /cvsroot/nfcchat/nfcchat/src/overview.html, /cvsroot/nfcchat/nfcchat/build.xml:
+	- added package.html files which were apparently never added
+	- starting to put ant in place
+
+2001-09-06  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/nfc.html, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.fla, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.swf:
+	fixed bug - nfcUI.swf should use parameters for _host and _port if passed in from HTML
+
+2001-09-06  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/nfc.html, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.fla, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.swf:
+	fixed bug - nfcUI.swf should use parameters for _host and _port if passed in from HTML
+
+2001-09-06  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/nfc.html, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.fla, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.swf:
+	fixed bug - nfcUI.swf should use parameters for _host and _port if passed in from HTML
+
+2001-09-06  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/nfc.html, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.fla, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.swf:
+	fixed bug - nfcUI.swf should use parameters for _host and _port if passed in from HTML
+
+2001-07-20  jahlonzo  <jahlonzo@crud>
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/nfcEngine.swf, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.swf:
+	added compliled/built swf files for the flas
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/index.html: referenced code in CVS
+
+	* /cvsroot/nfcchat/nfcchat/.deps_server_flash:
+	added flash server deps file
+
+	* /cvsroot/nfcchat/nfcchat/web/flash/index.html, /cvsroot/nfcchat/nfcchat/web/flash/nfc.html, /cvsroot/nfcchat/nfcchat/web/flash/nfcEngine.fla, /cvsroot/nfcchat/nfcchat/web/flash/nfcUI.fla:
+	added flash client files and docs
+
+	* /cvsroot/nfcchat/nfcchat/Makefile:
+	added target to build flash server, fixed docs target
+
+	* /cvsroot/nfcchat/nfcchat/bin/runFlashServer, /cvsroot/nfcchat/nfcchat/bin/runFlashServer.bat:
+	add scripts to run flash server
+
+	* /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashChatClient.java, /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashChatServer.java, /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashConnectionHandler.java, /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashMessage.java, /cvsroot/nfcchat/nfcchat/src/com/ajdigital/chat/server/remote/FlashReaderThread.java, /cvsroot/nfcchat/nfcchat/src/com/lyrisoft/chat/server/remote/ReaderThread.java:
+	added files for Flash client support
+
+2000-11-1
+	Version 1.0.6-rc3
+	Fixed another hard-coded message left-over
+
+	Kick was fixed (It was not properly updating the DistributedState).
+	
+2000-10-31
+	Revisted the Netscape userlist repaint bug.  Appears to be fixed
+	now. 
+	
+2000-10-31
+	Version 1.0.6-rc2
+	Added German translations (thanks to Dennis Stosberg
+	dennis@stosberg.net).
+
+	Fixed a left-over hardcoded label in ChatRoom.java.
+
+	Improved colors in LoginPanel.
+
+	RoomServer is now correctly taking away ops upon partting a room.
+	
+2000-10-30
+	Version 1.0.6-rc1
+	command.properties is now has extra atrributes
+	"command".access - for setting the access level
+	"command".help - for setting the help message
+	"command".usage - for setting the usage message
+
+        Initial implementation of "ops".  /op and /kick is implemented
+	(local only; not yet distributed)
+
+	Integrated italian translation (thanks to Aldo Armiento
+	aldo@armiento.com)
+	
+2000-10-27
+	Version 1.0.5
+	Client (awt only) and server have some i18n functionality now (the
+	messages/language of the software is configurable without
+	recompiling).  Added English (default) and Jive :)
+	messages.properties files.
+
+	Moved getProperites() out of IChatGUIFactory, where it never
+	belonged in the first place.
+	
+2000-10-21
+	Version 1.0.4b
+	Fixed the 2-Consoles bug.
+
+2000-10-20
+	Version 1.0.4a
+	Windows batch files and nfc-win.conf now included as part of the
+	distribution. 
+	
+2000-10-19
+	Tidied up the environment to ensure that the clients will run in
+	standalone mode.
+
+	There is an initial (very basic) Swing implementation in here now
+	as well.  
+	
+2000-10-18
+	Version 1.0.4
+	
+	Fixed a major, though nearly unnoticable problem with scrolling.
+
+	Fixed a bug where the server was pinging the client WAY too much
+	(I wonder why nobody noticed before :)
+
+	Somewhere along the line, the color params in the applet got
+	broken and were not being honored.  Now fixed.
+
+	Fixed the recently broken embedded mode (no more half-display or
+	no disply problems.. hopefully)
+	
+2000-10-15
+	Fixed minor repaint bug in ChatPanel's userlist
+
+	Did away with the silly DefaultCommandProcessorFactory and
+	DefaultUserCommandFactory.  Replaced these with dynamic
+	properties-file based initialization, just like the server side.
+
+	Added new files web/resources/userCommands.properties and
+	web/resources/commandProcessors.properties which replace the old
+	factories.  This will be much better for people hacking up their
+	own custom version.
+	
+2000-10-12
+	cleaned up logging quite a bit.
+
+	mutliple provider url's for jms can be specified, and they will be
+	round-robined. 
+	
+2000-10-06
+	clients joining/leaving and rooms getting created/destroyed info
+	is not sent to the client unless it asks.
+	
+2000-10-05
+	fixed null pointer exception in ChatServer that occurred if JMS
+	was disabled.  
+
+	fixed a problem with "general messages" not getting displayed in
+	the embedded mode
+
+	some minor fixes in the docs
+	
+2000-10-04
+	VERSION 1.0.0
+
+	NFC is now a scalable distributed system, where multiple servers
+	combine to form a web of servers (conceptually similar to IRC).
+	This was a big enough change in itself, so I'm calling this 1.0.0,
+	even though I expect bugs.  Lots of bugs.
+
+	There is now a protocol specification document, finally.  It is
+	about 90% complete.  The code actually follows the spec very
+	closely.  Any difference at this point must be resolved either in
+	the code or in the spec.  (Most likely in the code)
+
+	There is now a halfway decent install document.
+
+	The popup dialogs (msg, ping, etc.) in the chat room are disabled
+	because they weren't working on Netscape for Mac.  I spent hours
+	trying to work-around it but I couldn't.  Did I mention that I
+	hate applets?  I'm seriously.
+	
+	Completely removed the Windows .batch files.  Those have to be
+	done over and done right at some point.
+
+	Spent nearly 21 hours in front of my computer today.
+	
+2000-05-01
+	All sorts of bugfixes.  More on the protocol.  There are still
+	some messages that are sent from the server as english.  They
+	need to be converted to protocol.
+
+	Private messages now get their own little chat window.
+	0.9.12
+	
+2000-04-28
+	Changed the protocol around a bit.  It's now almost good enough :)
+	
+2000-04-23
+	Implemented a workaround that allows the server to run on
+	FreeBSD's somewhat buggy JDK1.2.2.  To enable the workaround, pass
+	"-DBSD_HACK=anyvalue" to the Java runtime.  (There is a
+	commented-out example in the bin/runServer script)
+
+	Wrote a new README.
+	
+	Version: 0.9.10
+	
+2000-04-16
+	Improved client timeouts.  Now, if a client crashes and the server
+	doesn't notice right away, the stale connection will be cleaned up
+	within 5 minutes rather than one hour.
+	
+2000-04-15
+	Implemented a way to defeat firewalls, using a Servlet and http requests.
+
+	Fixed the bug that was preventing the client from working in IE
+	for Macintosh.
+	
+2000-04-??
+	Started localization support on the server side.
+	
+2000-04-03
+	Bugfixes for EmbeddedAppletGUIFactory and HyperlinkTextView.
+	Version: 0.9.9.1
+	
+2000-04-03
+	The /join command was overloaded to take an optional password.  If
+	this password is passed at room creation time, the room becomes
+	password-protected (which means you can only /join if you know the
+	password. 
+
+	Version: 0.9.9
+
+2000-04-03
+	Integrated the JdbcAuthenticator (contributed by Wayne A. Hogue II
+	<w.hogue@chiphead.net>)
+	
+2000-04-03
+	More menus.
+	Sound. (broken in Linux/Netscape.  don't know why)
+	Button bar can be disabled and reenabled.
+	Server kicks off connections that have been idle for X minutes.
+	
+2000-04-01
+	Minor com.lyrisoft.awt.HyperLinkTextView optimizations.
+	Lame emote and pemote gifs. (Icons should be in the client jar, no?)
+	
+2000-03-30
+	Fixed hardcoded file path bug. (DUH!)
+	
+	Cleaned up the IChatGUIFactory interface.  The methods don't take
+	lots of parameters any more.
+
+	Added a generic dialog box component
+	(com.lyrisoft.chat.client.gui.awt102.Query) that displays a
+	Drop-down box and/or a text input field.  It pops up when one of
+	the buttons is clicked to query for data.
+
+	The server now remembers the last X logins.
+
+	User interface enhancements.
+
+	Tagged version 0.9.7
+	
+2000-03-27
+	Integrated Ignore and UnIgnore commands. (Contributed by Tasso
+	Mulzer <tasso@tasso.home.cs.tu-berlin.de>)
+
+	Tagged version 0.9.6
+	
+2000-03-26
+	Added two applet parameters
+	
+	autologin: automatically logs in the specified user name (useful
+	is the applet tag is generated dynamically 
+	
+	keepalive: if set to true, the applet will not exit when stop() is
+	called (e.g., when the user goes to another page)
+	
+2000-03-24
+	Wrote some windows batch files for building/running the client and server.
+	
+2000-03-23
+	Wrote INSTALL_SERVER and INSTALL_CLIENT how-to's.  
+	
+2000-03-22
+	Separate loggers for errors and messages.
+
+	Changed Mysql object to be non-static
+	
+2000-03-21
+	Now using image buttons.  Images by Jay Barnes (jay@ndi.net)
+
+	Changed the default colors to match the image buttons.
+	
+2000-03-21: Leif Jackson
+        Added the MysqlAuthentication classes, These are in beta don't use.
+
+2000-03-20
+	Changed the look of the ChatConsole.  It now has its own
+	TextView.  This is where messages show up if they have nowhere
+	else to go.
+
+	The server now reads a config file, nfc.conf.
+
+	The server now reads a "motd" file, and sends it to the clients
+	upon successful login.
+	
+2000-03-18
+	Added support for clickable hyperlinks in the ChatRoom
+
+2000-03-18
+	New Feature:  
+	<param name="autojoin" value="<someroom>">
+
+	Makes the client automatically join a particular room when the
+	login completes.
+	
+2000-03-17
+	Fixed two bugs
+	1. Private messages were being confirmed wrong.
+	2. The server sent back lowercase-only version of usernames for
+	user lists.  This caused some weirdness on the client.
+
+	Got rid of the useless historical information at the end of this
+	file.
+
+	Wrote the beginnings of a LoadTest tool.
+
+	Fixed another bug
+	A method of RoomServer did not have the proper synchronization.
+	Under certain conditions, this was raising a
+	ConcurrentModificationException (thrown from  java.util.HashMap).
+	How nice indeed that the HashMap pessimistically throws this
+	exception, make it far easier to debug threading issues!
+	
+2000-03-02
+	Added a PasswdAuthenticator.  Also added a file in bin called
+	nfcpasswd that lets you add a user to the passwd file.
+
+	No attempted is made to lock the passwd file when it's been
+	modified.. that's probably not good.
+
+	Changed the classes in client.command so they throw
+	NotEnoughArgumentsException up the stack.  This is caught by the
+	UserCommands class and dealt with by asking the server for help on
+	that command.
+
+	Added a make dist to the Makefile.  Make dist just builds the jars
+	in the lib directory.
+	
+2000-02-29
+	The CVSROOT directory was lost.  I reimported my working copy.
+	Nothing was lost, except for version history.  I guess it's no big
+	deal at this point.
+	
+2000-02-29
+	Implemented /help!
+
+	Slightly modified the Logger so that it writes its output in a separate Thread.
+	
+2000-02-27
+	Wrote many, many, many, many code comments.  Removed a few unused
+	classes.  Moved a few classes around.  Regenerated the javadoc.
+	
+2000-02-24
+	Cleaned up the Makefile.. Consolidated `find` stuff into a variable
+	
+2000-02-24
+	Added Manifest skeletons src/*.MF to help the jars become executable
+	with "java -jar chatclient.jar" for example.
+	
+2000-02-24
+	Removed diff crud from Makefile. --Billy
+	
+200-02-24
+	I sent out an email earlier today to everybody I could think of to
+	come and try the code.  We found two bugs.  These have been fixed.
+
+	BUG 1
+	On some platforms (notably JDK1.0.2 and Netscape-for-Macintosh),
+	there is an inconsistency with the ScrollBar.  (See
+	http://developer.java.sun.com/developer/bugParade/bugs/4070498.html
+	for description and workaround suggestion.)
+
+	BUG 2
+	I was using Graphics.translate() and Graphics.setClipRect() to
+	"scroll" the textview.  This was fine on Linux and NT, but on
+	Win95 and Macintosh, the clipping got all messed up for some
+	reason and only a small area of the TextView was being updated.
+
+	Solution: Not using Graphics.translate() or clipping anymore.
+	Instead, each TextRun gets passed a yTranslation, and the TextRun
+	draws itself bassed on that offset.  This has to work because I'm
+	not clipping the graphics at all now.
+
+	There were some other bugs in TextView that I came across and
+	fixed those as well.  
+	
+
+	TODO
+	- Implement a font-selector.  The only real reason for
+	this is because the fonts in Netscape for Linux Java suck.
+
+	- Send ACKs to the client when a private message is dispatched to
+	the recipient.
+
+	Mentioned below and still to do
+	- KILL command
+	- Simple Auth module implementation (passwd file based)
+	
+2000-02-23
+	KILL is the only command left unimplemented.  We need to implement authentication first.
+	Things are in good shape.  Hardly tested at all, but everything seems to work.
+	
+2000-02-22
+	Forget DSTC TextArea.  It was king of buggy and slow.  I made my
+	own.  Mine is much faster than the DSTC one, and does not include
+	the bugs.  Plus, I didn't really want to pay $500.
+
+	I am ready to implement a few final commands
+	PING
+	WHOIS
+	STATS
+	KILL
+
+	I need to add at least one authentication plug-in (probably
+	file-based).  
+
+	I need to add buttons to the GUI to make it more user-friendly.
+	Notably, buttons for all the commands above + EMOTE.  And a button
+	to clear the TextView would be nice.
+
+	Enhanced the ChatRoomPanel.. has lots of (currently inactive
+	buttons).
+
+	Made an "Are you sure" dialog for when the user clicks Sign Off
+	
+2000-02-20
+	Now using a better TextArea component, from
+	http://archive.dstc.edu.au/TU/wOrlds/phelps/text/ (I'm awaiting a
+	response regarding the license)
+
+	Created an AppletGUIFactory that keeps everything inside one
+	Applet, instead of spawning multiple windows.
+
+	Made the ChatPanel a little bit prettier.  Added some buttons to
+	it (these buttons do nothing for now)
+	
+	Created a little RoomLister frame.  No equivalent yet for the
+	applet version
+	
+	
+2000-02-18
+	The system runs.  But it doesn't do much.
+
+	You can log on, join a room (programattically), and talk.
+
+	User joined and User parted notifications are sent by the server
+	and processed on the client. 
+
+	The user list in the chat room gui is consistent with the state of the
+	room.
+
+	Next steps:
+	- help system
+	- login dialog
+	- authentication (define pluggable authentication module
+	interface)
+	- room "titles"
+	- check applet compliance
+	- change packages to com.invantix instead of com.lyrisoft
+

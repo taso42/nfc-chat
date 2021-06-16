@@ -1,0 +1,68 @@
+Installing the NFC Client
+-------------------------
+
+There are two ways to run the NFC client.  One way is as a standalone
+application.  The other way is as an applet running inside of a web
+browser.
+
+In either case, you must first follow the directions in INSTALL_SERVER
+to get your environment set up and get everything compiled.  
+
+Running NFC client as a standalone application:
+-----------------------------------------------
+
+Simply execute the runClient script (in the bin directory).  runClient
+requires 2 command-line arguments: host and port.  E.g.,
+
+$ ./bin/runClient localhost 8199
+
+That's it.  To the NFC client up as an applet, read on...
+
+Installing/running NFC client as an applet
+------------------------------------------
+Prerequisites:
+o Any old web server :)
+
+STEP 1:
+Create a directory where you will keep the NFC client.  (e.g.,
+/htdocs/nfc)
+
+STEP 2:
+Make the new directory created in STEP 1 web accessible.  
+
+STEP 3:
+Filecopymania...
+
+  1. Copy the sample file, client.html (found in the web directory) to
+     the directory you created in STEP 1.
+
+  2. Copy the file chatclient.jar (found in lib after a successful
+     compile) to the directory created in STEP 1.
+
+  3. Copy the whole resources directory (found under adm) to the
+     directory created in STEP 1.
+
+STEP 3 (optional):
+Configure the applet...
+
+Edit the file client.html (in the directory you created in STEP 1).
+
+Ensure that the port is set to the same port that you used when
+starting up the server.
+
+Optionally, you can supply an applet parameter that specifies 
+the default chatroom to enter upon connecting.  The syntax for this
+parameter is:
+
+<param name="autojoin" value="ANY ROOM NAME">
+
+This tag should live in between the <applet> </applet> tags.
+
+This room will be created as soon as someone logs on for the first time.
+
+STEP 4:
+See if it worked.
+
+Point your web browser to the web location that you set up in STEP 2.
+If everything worked, you will see the NFC login screen.
+

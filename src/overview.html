@@ -1,0 +1,31 @@
+<body>
+Contained herein is Javadoc documentation about NFC's source code.
+Since there are a lot of classes and packages, here is a brief
+overview:
+<p>
+
+The classes related to the client are:
+<ul>
+<li>com.lyrisoft.chat.client (and subpackages)
+<li>com.lyrisoft.chat.server.local (and subpackages)
+<li>com.lyrisoft.chat.awt    
+</ul>
+
+The classes related to the server are:
+<ul>
+<li>com.lyrisoft.chat.server.remote (and subpackages)
+<li>com.lyrisoft.util (and subpackages)    
+</ul>
+
+Also related to the server is the "jfd" package.  This is some code
+found on the web that implements the unix crypt algorithm.  It is used
+in the PasswdAuthenticator, which uses a unix-style password file.
+
+<p>
+One major source of confusion are the com.lyrisoft.chat.server.<b>remote</b>
+and com.lyrisoft.chat.server.<b>local</b> packages (for the server and client,
+respectively).  This was an unfortunate choice of naming and
+packaging, so I thought I would point it out to avoid confusion.
+
+</body>
+
